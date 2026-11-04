@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dai&Di - Finalizar Pagamento</title>
+    <style>
+        :root {
+            --bg-body: #f4f4f6;
+            --bg-card: #ffffff;
+            --bg-header: #111111;
+            --bg-input: #ffffff;
+            --bg-box: #fafafa;
+            --text-primary: #333333;
+            --text-title: #111111;
+            --text-label: #555555;
+            --border-color: #dddddd;
+            --border-card: transparent;
+            --accent: #10b981;
+            --accent-hover: #059669;
+            --btn-theme-bg: #333333;
+            --btn-theme-color: #ffffff;
+            --card-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #121214;
+            --bg-card: #1e1e24;
+            --bg-header: #18181b;
+            --bg-input: #121214;
+            --bg-box: #18181b;
+            --text-primary: #e1e1e6;
+            --text-title: #f4f4f6;
+            --text-label: #a1a1aa;
+            --border-color: #3f3f46;
+            --border-card: #2d2d35;
+            --accent: #10b981;
+            --accent-hover: #059669;
+            --btn-theme-bg: #27272a;
+            --btn-theme-color: #f4f4f6;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; transition: background-color 0.2s, color 0.2s; }
+        body { background-color: var(--bg-body); color: var(--text-primary); }
+
+        header {
+            background: var(--bg-header);
+            color: #fff;
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-card);
+        }
+        .logo { font-size: 22px; font-weight: 800; color: #fff; }
+        .logo span { color: var(--accent); }
+
+        .header-actions { display: flex; align-items: center; gap: 10px; }
+        .btn-theme-toggle, .btn-back {
+            background: var(--btn-theme-bg);
+            color: var(--btn-theme-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .checkout-layout {
+            max-width: 1100px;
+            margin: 30px auto 60px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 850px) {
+            .checkout-layout { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 24px;
+            border: 1px solid var(--border-card);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-title);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group.full { grid-column: span 2; }
+
+        label { font-size: 12px; font-weight: 700; color: var(--text-label); }
+        input, select {
+            background-color: var(--bg-input);
+            color: var(--text-primary);
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 13px;
+            outline: none;
+        }
+        input:focus { border-color: var(--accent); }
+
+        /* Métodos de Pagamento */
+        .payment-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .payment-option {
+            border: 1px solid var(--border-color);
+            background: var(--bg-box);
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        .payment-option.active {
+            border-color: var(--accent);
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent);
+        }
+
+        .payment-details { display: none; margin-top: 15px; }
+        .payment-details.active { display: block; }
+
+        .pix-box {
+            text-align: center;
+            padding: 15px;
+            border: 1px dashed var(--accent);
+            border-radius: 6px;
+            background: var(--bg-box);
+        }
+
+        .order-summary-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            font-weight: 800;
+            margin-top: 15px;
+            color: var(--text-title);
+        }
+
+        .btn-finish {
+            width: 100%;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.2s;
+        }
+        .btn-finish:hover { background: var(--accent-hover); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">Dai&Di <span>Checkout</span></div>
+        <div class="header-actions">
+            <button type="button" class="btn-theme-toggle" id="btn-toggle-theme" onclick="alternarTema()">🌙 Modo Escuro</button>
+            <a href="carrinho.html" class="btn-back">← Voltar ao Carrinho</a>
+        </div>
+    </header>
+
+    <div class="checkout-layout">
+        <!-- Coluna Esquerda: Dados e Pagamento -->
+        <div>
+            <!-- Dados Pessoais -->
+            <div class="card">
+                <h2 class="card-title">👤 Dados Pessoais</h2>
+                <form id="form-checkout" class="form-grid">
+                    <div class="form-group full">
+                        <label>Nome Completo</label>
+                        <input type="text" id="cli-nome" required placeholder="Ex: Maria Silva">
+                    </div>
+                    <div class="form-group">
+                        <label>CPF</label>
+                        <input type="text" id="cli-cpf" required placeholder="000.000.000-00">
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone / WhatsApp</label>
+                        <input type="tel" id="cli-fone" required placeholder="(47) 99999-9999">
+                    </div>
+                    <div class="form-group full">
+                        <label>E-mail</label>
+                        <input type="email" id="cli-email" required placeholder="maria@email.com">
+                    </div>
+                </form>
+            </div>
+
+            <!-- Endereço de Entrega -->
+            <div class="card">
+                <h2 class="card-title">📍 Endereço de Entrega</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>CEP</label>
+                        <input type="text" id="end-cep" placeholder="89000-000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Cidade / UF</label>
+                        <input type="text" id="end-cidade" placeholder="Blumenau / SC" required>
+                    </div>
+                    <div class="form-group full">
+                        <label>Rua e Bairro</label>
+                        <input type="text" id="end-rua" placeholder="Rua XV de Novembro, Centro" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Número</label>
+                        <input type="text" id="end-num" placeholder="123" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Complemento</label>
+                        <input type="text" id="end-comp" placeholder="Apto 101 / Bloco B">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Forma de Pagamento -->
+            <div class="card">
+                <h2 class="card-title">💳 Forma de Pagamento</h2>
+                <div class="payment-options">
+                    <div class="payment-option active" onclick="selecionarMetodo('pix')">⚡ PIX</div>
+                    <div class="payment-option" onclick="selecionarMetodo('cartao')">💳 Cartão</div>
+                    <div class="payment-option" onclick="selecionarMetodo('boleto')">📄 Boleto</div>
+                </div>
+
+                <!-- Detalhes do PIX -->
+                <div id="pay-pix" class="payment-details active">
+                    <div class="pix-box">
+                        <p style="font-weight: 700; margin-bottom: 8px;">Aprovação Instantânea</p>
+                        <p style="font-size: 12px; opacity: 0.8;">O código QR Code PIX será gerado assim que você clicar em finalizar pedido.</p>
+                    </div>
+                </div>
+
+                <!-- Detalhes do Cartão -->
+                <div id="pay-cartao" class="payment-details">
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label>Número do Cartão</label>
+                            <input type="text" placeholder="0000 0000 0000 0000">
+                        </div>
+                        <div class="form-group full">
+                            <label>Nome Impresso no Cartão</label>
+                            <input type="text" placeholder="Como no cartão">
+                        </div>
+                        <div class="form-group">
+                            <label>Validade</label>
+                            <input type="text" placeholder="MM/AA">
+                        </div>
+                        <div class="form-group">
+                            <label>CVV</label>
+                            <input type="text" placeholder="123">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalhes do Boleto -->
+                <div id="pay-boleto" class="payment-details">
+                    <p style="font-size: 13px; opacity: 0.8;">O boleto bancário será emitido para impressão ou cópia da linha digitável após a confirmação. Vencimento em 3 dias úteis.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna Direita: Resumo do Pedido -->
+        <div>
+            <div class="card">
+                <h2 class="card-title">🛒 Resumo da Compra</h2>
+                <div id="itens-resumo"></div>
+
+                <div class="order-summary-item" style="margin-top: 15px;">
+                    <span>Subtotal</span>
+                    <span id="resumo-subtotal">R$ 0,00</span>
+                </div>
+                <div class="order-summary-item">
+                    <span>Frete</span>
+                    <span style="color: var(--accent); font-weight: bold;">Grátis</span>
+                </div>
+
+                <div class="total-row">
+                    <span>Total</span>
+                    <span id="resumo-total">R$ 0,00</span>
+                </div>
+
+                <button type="button" class="btn-finish" onclick="finalizarPedido()">Confirmar e Pagar</button>
+            </div>
+        </div>
+    </div>
+
+   <script>
+        let metodoSelecionado = 'pix';
+
+        function alternarTema() {
+            const body = document.body;
+            const btn = document.getElementById('btn-toggle-theme');
+            const ehEscuro = body.getAttribute('data-theme') === 'dark';
+
+            if (ehEscuro) {
+                body.removeAttribute('data-theme');
+                btn.innerHTML = '🌙 Modo Escuro';
+                localStorage.setItem('daidi_theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                btn.innerHTML = '☀️ Modo Claro';
+                localStorage.setItem('daidi_theme', 'dark');
+            }
+        }
+
+        function carregarTemaSalvo() {
+            const temaSalvo = localStorage.getItem('daidi_theme');
+            const btn = document.getElementById('btn-toggle-theme');
+            if (temaSalvo === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                if (btn) btn.innerHTML = '☀️ Modo Claro';
+            }
+        }
+
+        function selecionarMetodo(metodo) {
+            metodoSelecionado = metodo;
+            document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('active'));
+            document.querySelectorAll('.payment-details').forEach(det => det.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(`pay-${metodo}`).classList.add('active');
+        }
+
+        function obterCarrinhoCheckout() {
+            return JSON.parse(localStorage.getItem('daidi_cart')) || JSON.parse(localStorage.getItem('daidi_carrinho')) || [];
+        }
+
+        function carregarResumoCarrinho() {
+            let carrinho = obterCarrinhoCheckout();
+            let container = document.getElementById('itens-resumo');
+            let total = 0;
+
+            if (!carrinho || carrinho.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-label); font-style:italic;">Nenhum item encontrado.</p>';
+                document.getElementById('resumo-subtotal').innerText = 'R$ 0,00';
+                document.getElementById('resumo-total').innerText = 'R$ 0,00';
+                return;
+            }
+
+            container.innerHTML = '';
+            carrinho.forEach(item => {
+                let precoItem = parseFloat(item.preco || 0);
+                total += precoItem;
+
+                let txtTam = item.tamanho && item.tamanho !== 'undefined' ? item.tamanho : (item.tamanhoBlusa ? `Blusa: ${item.tamanhoBlusa}` : 'Único');
+
+                container.innerHTML += `
+                    <div class="order-summary-item">
+                        <div>
+                            <strong>${item.nome || 'Produto'}</strong><br>
+                            <small style="opacity: 0.7;">Qtd: ${item.quantidade || 1} | Tam: ${txtTam}</small>
+                        </div>
+                        <div>R$ ${precoItem.toFixed(2).replace('.', ',')}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('resumo-subtotal').innerText = 'R$ ' + total.toFixed(2).replace('.', ',');
+            document.getElementById('resumo-total').innerText = 'R$ ' + total.toFixed(2).replace('.', ',');
+        }
+
+        // Salva o pedido no localStorage para o painel admin ler
+        function finalizarPedido() {
+            let nome = document.getElementById('cli-nome').value.trim();
+            let cpf = document.getElementById('cli-cpf').value.trim();
+            let fone = document.getElementById('cli-fone').value.trim();
+            let email = document.getElementById('cli-email').value.trim();
+            let cep = document.getElementById('end-cep').value.trim();
+            let cidade = document.getElementById('end-cidade').value.trim();
+            let rua = document.getElementById('end-rua').value.trim();
+            let num = document.getElementById('end-num').value.trim();
+            let comp = document.getElementById('end-comp').value.trim();
+
+            if (!nome || !cpf || !fone || !cep || !rua || !num) {
+                alert('Por favor, preencha os campos obrigatórios de Dados Pessoais e Endereço!');
+                return;
+            }
+
+            let carrinho = obterCarrinhoCheckout();
+            if (carrinho.length === 0) {
+                alert('Seu carrinho está vazio!');
+                window.location.href = 'carrinho.html';
+                return;
+            }
+
+            let totalGeral = carrinho.reduce((acc, item) => acc + parseFloat(item.preco || 0), 0);
+
+            // Cria o objeto do pedido com ID único baseado no timestamp
+            const novoPedido = {
+                id: 'PED-' + Date.now().toString().slice(-6),
+                data: new Date().toLocaleString('pt-BR'),
+                cliente: nome,
+                cpf: cpf,
+                telefone: fone,
+                email: email,
+                endereco: `${rua}, nº ${num} - ${cidade} ${comp ? '(' + comp + ')' : ''}`,
+                cep: cep,
+                formaPagamento: metodoSelecionado.toUpperCase(),
+                itens: carrinho,
+                total: totalGeral,
+                status: 'Pendente'
+            };
+
+            // Recupera pedidos anteriores do localStorage ou cria array vazio
+            let pedidosSalvos = JSON.parse(localStorage.getItem('daidi_pedidos')) || [];
+            pedidosSalvos.unshift(novoPedido); // Adiciona o mais novo no topo
+
+            localStorage.setItem('daidi_pedidos', JSON.stringify(pedidosSalvos));
+
+            alert('🎉 Pedido realizado com sucesso!');
+            
+            // Limpa o carrinho
+            localStorage.removeItem('daidi_cart');
+            localStorage.removeItem('daidi_carrinho');
+            
+            window.location.href = 'index.html';
+        }
+
+        carregarTemaSalvo();
+        carregarResumoCarrinho();
+    </script>

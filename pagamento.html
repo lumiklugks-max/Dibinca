@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento - Dai&Di Lingeries</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">Dai&Di <span>Lingeries</span></a>
+        <ul class="nav-links">
+            <li><a href="carrinho.html">← Voltar ao Carrinho</a></li>
+        </ul>
+    </header>
+
+    <div class="container" style="margin-top: 40px; max-width: 900px;">
+        <h1 style="margin-bottom: 25px; font-size: 24px; color: #222;">Finalizar Pedido</h1>
+
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; align-items: start;">
+            
+            <!-- Formulário de Endereço e Pagamento -->
+            <div style="background: #fff; padding: 25px; border-radius: 8px; border: 1px solid #eee;">
+                <h3 style="margin-bottom: 20px; font-size: 16px; color: #333;">1. Endereço de Entrega</h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px;">Nome Completo</label>
+                    <input type="text" id="nome-cliente" placeholder="Digite seu nome completo" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px;">CEP</label>
+                        <input type="text" id="cep" placeholder="00000-000" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px;">Telefone / WhatsApp</label>
+                        <input type="text" id="telefone" placeholder="(00) 00000-0000" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px;">Endereço (Rua, Número e Bairro)</label>
+                    <input type="text" id="endereco" placeholder="Ex: Rua das Flores, 123 - Centro" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+
+                <h3 style="margin-bottom: 15px; font-size: 16px; color: #333;">2. Forma de Pagamento</h3>
+                <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px;">
+                        <input type="radio" name="pagamento" value="Pix" checked> Pix (18% OFF)
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px;">
+                        <input type="radio" name="pagamento" value="Cartao"> Cartão de Crédito
+                    </label>
+                </div>
+
+                <button type="button" id="btn-finalizar" class="btn" style="width: 100%; padding: 14px; font-size: 16px; background: #2a9d8f; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Confirmar e Finalizar Pedido</button>
+            </div>
+
+            <!-- Resumo Final -->
+            <div style="background: #f9f9f9; padding: 25px; border-radius: 8px; border: 1px solid #eee;">
+                <h3 style="margin-bottom: 15px; font-size: 18px; color: #222;">Total da Compra</h3>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px; color: #666;">
+                    <span>Itens no Carrinho</span>
+                    <span id="resumo-qtd">0</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 20px; font-weight: bold; color: #222;">
+                    <span>Valor Final</span>
+                    <span id="resumo-total" style="color: #bc6c25;">R$ 0,00</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { db } from "./firebase-config.js";
+        import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Carrega valores do carrinho
+        let carrinho = JSON.parse(localStorage.getItem('daidi_cart')) || [];
+        let totalGeral = carrinho.reduce((acc, item) => acc + item.preco, 0);
+
+        document.getElementById('resumo-qtd').innerText = carrinho.length;
+        document.getElementById('resumo-total').innerText = "R$ " + totalGeral.toFixed(2).replace('.', ',');
+
+        document.getElementById('btn-finalizar').addEventListener('click', async () => {
+            const nome = document.getElementById('nome-cliente').value;
+            const cep = document.getElementById('cep').value;
+            const telefone = document.getElementById('telefone').value;
+            const endereco = document.getElementById('endereco').value;
+            const pagamento = document.querySelector('input[name="pagamento"]:checked').value;
+
+            if (!nome || !cep || !endereco) {
+                alert("Por favor, preencha os campos obrigatórios de endereço.");
+                return;
+            }
+
+            if (carrinho.length === 0) {
+                alert("Seu carrinho está vazio!");
+                window.location.href = "index.html";
+                return;
+            }
+
+            try {
+                // Salva o pedido no Firestore (banco de dados)
+                await addDoc(collection(db, "pedidos"), {
+                    cliente: nome,
+                    cep: cep,
+                    telefone: telefone,
+                    endereco: endereco,
+                    formaPagamento: pagamento,
+                    itens: carrinho,
+                    total: totalGeral,
+                    status: "Pendente",
+                    data: new Date().toISOString()
+                });
+
+                // Limpa o carrinho local
+                localStorage.removeItem('daidi_cart');
+                
+                alert("Pedido realizado com sucesso! Obrigado por comprar na Dai&Di Lingeries.");
+                window.location.href = "index.html";
+
+            } catch (error) {
+                console.error("Erro ao salvar pedido: ", error);
+                alert("Houve um erro ao processar seu pedido. Tente novamente.");
+            }
+        });
+    </script>
+
+</body>
+</html>

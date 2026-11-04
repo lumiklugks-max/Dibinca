@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Pedidos | Dai&Di Lingeries</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+        body { background-color: #f8f9fa; color: #333; }
+        body.dark-theme { background-color: #121212; color: #e0e0e0; }
+
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: #fff; border-bottom: 1px solid #eee; }
+        body.dark-theme header { background: #1e1e1e; border-bottom: 1px solid #333; }
+        
+        .logo { font-size: 24px; font-weight: 800; color: #111; text-decoration: none; }
+        body.dark-theme .logo { color: #fff; }
+        .logo span { color: #bc6c25; }
+
+        .nav-links { list-style: none; display: flex; gap: 20px; align-items: center; margin: 0; padding: 0; }
+        .nav-links a { text-decoration: none; color: #444; font-weight: 600; font-size: 14px; }
+        body.dark-theme .nav-links a { color: #ccc; }
+        .nav-links a:hover { color: #bc6c25; }
+
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .admin-panel { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #eee; overflow-x: auto; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        body.dark-theme .admin-panel { background: #1e1e1e; border-color: #333; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+
+        /* Tabela */
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th { padding: 12px; border-bottom: 2px solid #eee; color: #444; }
+        body.dark-theme th { border-bottom-color: #444; color: #ccc; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+        body.dark-theme td { border-bottom-color: #333; }
+        
+        tr:hover { background-color: #fcfcfc; }
+        body.dark-theme tr:hover { background-color: #252525; }
+
+        /* Status Select */
+        .status-select { padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-weight: bold; cursor: pointer; background: #fff; }
+        body.dark-theme .status-select { background: #2a2a2a; color: #fff; border-color: #444; }
+        
+        /* Botão Ação */
+        .btn-acao { background: #2a9d8f; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .btn-acao:hover { background: #218377; }
+
+        /* Modal de Detalhes do Pedido */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        
+        .modal-content { background: #fff; padding: 25px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; position: relative; }
+        body.dark-theme .modal-content { background: #1e1e1e; color: #e0e0e0; }
+        
+        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #888; border: none; background: none; }
+        
+        .modal-item { display: flex; gap: 15px; border-bottom: 1px solid #eee; padding: 10px 0; align-items: center; }
+        body.dark-theme .modal-item { border-bottom-color: #333; }
+        
+        .modal-item img { width: 60px; height: 75px; object-fit: cover; border-radius: 6px; }
+        .modal-item-details { flex-grow: 1; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">Dai&Di <span>Admin</span></a>
+        <ul class="nav-links">
+            <li><a href="admin_pedidos.html" style="font-weight: bold; color: #bc6c25;">Pedidos</a></li>
+            <li><a href="admin_financas.html">Finanças</a></li>
+            <li><a href="index.html">Ver Loja</a></li>
+            <li><button onclick="alternarTema()" style="background:none;border:none;cursor:pointer;font-size:18px;" id="theme-toggle">🌙</button></li>
+        </ul>
+    </header>
+
+    <div class="container">
+        <h1 style="margin-bottom: 25px; font-size: 24px;">Gerenciamento de Pedidos</h1>
+
+        <div class="admin-panel">
+            <div id="lista-pedidos">
+                <p style="color: #666; text-align: center; padding: 20px;">Carregando pedidos...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Detalhes do Pedido -->
+    <div class="modal-overlay" id="modalDetalhes">
+        <div class="modal-content">
+            <button class="modal-close" onclick="fecharModal()">&times;</button>
+            <h2 style="margin-bottom: 15px; color: #bc6c25;" id="modal-titulo-pedido">Detalhes do Pedido</h2>
+            <div id="modal-cliente-info" style="margin-bottom: 20px; font-size: 14px; line-height: 1.5;"></div>
+            <h3 style="font-size: 16px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Itens Comprados</h3>
+            <div id="modal-itens-lista"></div>
+        </div>
+    </div>
+
+    <script>
+        const FOTO_PADRAO = 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop';
+
+        function carregarPedidos() {
+            const container = document.getElementById('lista-pedidos');
+            const pedidos = JSON.parse(localStorage.getItem('daidi_pedidos')) || [];
+
+            if (pedidos.length === 0) {
+                container.innerHTML = `<p style="color: #666; text-align: center; padding: 20px;">Nenhum pedido registrado até o momento.</p>`;
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID / Data</th>
+                            <th>Cliente</th>
+                            <th>Pagamento</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            pedidos.forEach((p, index) => {
+                let statusColor = p.status === 'Cancelado' ? '#e63946' : (p.status === 'Entregue' ? '#2a9d8f' : '#bc6c25');
+
+                html += `
+                    <tr>
+                        <td style="font-size: 12px; color: #777;">
+                            <strong>${p.id || 'PED-' + index}</strong><br>
+                            ${p.data || 'Recente'}
+                        </td>
+                        <td>
+                            <strong>${p.cliente}</strong><br>
+                            <span style="font-size: 12px; color: #666;">Tel: ${p.telefone || 'N/A'}</span>
+                        </td>
+                        <td style="font-size: 13px;">${p.formaPagamento}</td>
+                        <td style="font-weight: bold; color: #bc6c25;">R$ ${(p.total || 0).toFixed(2).replace('.', ',')}</td>
+                        <td>
+                            <select class="status-select" style="color: ${statusColor};" onchange="atualizarStatus(${index}, this.value, this)">
+                                <option value="Pendente" ${p.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                                <option value="Pago" ${p.status === 'Pago' ? 'selected' : ''}>Pago</option>
+                                <option value="Processando" ${p.status === 'Processando' ? 'selected' : ''}>Processando</option>
+                                <option value="Enviado" ${p.status === 'Enviado' ? 'selected' : ''}>Enviado</option>
+                                <option value="Entregue" ${p.status === 'Entregue' ? 'selected' : ''}>Entregue</option>
+                                <option value="Cancelado" ${p.status === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="btn-acao" onclick="abrirModal(${index})">Ver Detalhes</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        window.atualizarStatus = function(index, novoStatus, selectElement) {
+            let pedidos = JSON.parse(localStorage.getItem('daidi_pedidos')) || [];
+            if (pedidos[index]) {
+                pedidos[index].status = novoStatus;
+                localStorage.setItem('daidi_pedidos', JSON.stringify(pedidos));
+                
+                if(novoStatus === 'Cancelado') selectElement.style.color = '#e63946';
+                else if(novoStatus === 'Entregue') selectElement.style.color = '#2a9d8f';
+                else selectElement.style.color = '#bc6c25';
+            }
+        }
+
+        window.abrirModal = function(index) {
+            let pedidos = JSON.parse(localStorage.getItem('daidi_pedidos')) || [];
+            let p = pedidos[index];
+            if (!p) return;
+
+            document.getElementById('modal-titulo-pedido').innerText = `Detalhes do Pedido: ${p.id || ''}`;
+            
+            document.getElementById('modal-cliente-info').innerHTML = `
+                <strong>Cliente:</strong> ${p.cliente} <br>
+                <strong>CPF:</strong> ${p.cpf || 'Não informado'} <br>
+                <strong>Email:</strong> ${p.email || 'Não informado'} <br>
+                <strong>WhatsApp:</strong> ${p.telefone || 'Não informado'} <br>
+                <strong>Endereço de Entrega:</strong> ${p.endereco} <br>
+                <strong>CEP:</strong> ${p.cep}
+            `;
+
+            let itensHtml = '';
+            if (p.itens && p.itens.length > 0) {
+                p.itens.forEach(item => {
+                    let preco = parseFloat(item.preco || 0);
+                    let qtd = item.quantidade || 1;
+                    let img = item.imagem || FOTO_PADRAO;
+                    let tamanho = item.tamanho && item.tamanho !== 'undefined' ? item.tamanho : 'Único';
+
+                    itensHtml += `
+                        <div class="modal-item">
+                            <img src="${img}" alt="${item.nome}" onerror="this.onerror=null; this.src='${FOTO_PADRAO}';">
+                            <div class="modal-item-details">
+                                <div style="font-weight: bold; font-size: 15px;">${item.nome}</div>
+                                <div style="font-size: 13px; color: #666;">Tamanho: <strong>${tamanho}</strong> | Qtd: <strong>${qtd}</strong></div>
+                                <div style="font-weight: bold; color: #bc6c25; margin-top: 4px;">R$ ${preco.toFixed(2).replace('.', ',')}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                itensHtml = '<p style="color:#777; font-size:14px;">Nenhum item encontrado.</p>';
+            }
+
+            document.getElementById('modal-itens-lista').innerHTML = itensHtml;
+            document.getElementById('modalDetalhes').classList.add('active');
+        }
+
+        window.fecharModal = function() {
+            document.getElementById('modalDetalhes').classList.remove('active');
+        }
+
+        // Tema
+        function carregarTema() {
+            const temaSalvo = localStorage.getItem('daidi_theme');
+            if (temaSalvo === 'dark') {
+                document.body.classList.add('dark-theme');
+                document.getElementById('theme-toggle').innerText = '☀️';
+            }
+        }
+
+        function alternarTema() {
+            document.body.classList.toggle('dark-theme');
+            const ehEscuro = document.body.classList.contains('dark-theme');
+            localStorage.setItem('daidi_theme', ehEscuro ? 'dark' : 'light');
+            document.getElementById('theme-toggle').innerText = ehEscuro ? '☀️' : '🌙';
+        }
+
+        carregarTema();
+        carregarPedidos();
+    </script>
+</body>
+</html>

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dai&Di Lingeries - Seu Carrinho</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+        body { background-color: #f8f9fa; color: #333; }
+
+        /* Estilos do Tema Escuro */
+        body.dark-theme {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            background: #fff;
+            border-bottom: 1px solid #eee;
+        }
+        body.dark-theme header {
+            background: #1e1e1e;
+            border-bottom-color: #333;
+        }
+
+        .logo { font-size: 24px; font-weight: 800; color: #111; text-decoration: none; }
+        body.dark-theme .logo { color: #fff; }
+        .logo span { color: #bc6c25; }
+
+        .header-actions { display: flex; align-items: center; gap: 20px; }
+        .header-actions a { text-decoration: none; color: #444; font-weight: 600; font-size: 14px; }
+        body.dark-theme .header-actions a { color: #ccc; }
+        .header-actions a:hover { color: #bc6c25; }
+        body.dark-theme .header-actions a:hover { color: #dda15e; }
+
+        /* Botão de Alternar Tema */
+        .theme-toggle-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .theme-toggle-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        body.dark-theme .theme-toggle-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Layout Carrinho */
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .page-title { font-size: 26px; font-weight: 800; color: #222; margin-bottom: 25px; }
+        body.dark-theme .page-title { color: #fff; }
+
+        .cart-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .cart-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Lista de Produtos Soltos */
+        .cart-items-list { display: flex; flex-direction: column; gap: 15px; }
+        
+        .cart-item {
+            background: #fff;
+            border-radius: 8px;
+            padding: 18px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            border: 1px solid #eaeaea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            position: relative;
+        }
+        body.dark-theme .cart-item {
+            background: #1e1e1e;
+            border-color: #333;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        }
+
+        /* CARD DE COMBO AGRUPADO (ACCORDION) */
+        .cart-item-combo {
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #eaeaea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            overflow: hidden;
+        }
+        body.dark-theme .cart-item-combo {
+            background: #1e1e1e;
+            border-color: #333;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        }
+
+        .combo-header {
+            padding: 18px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+
+        .combo-badge {
+            background: #bc6c25;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+        body.dark-theme .combo-badge {
+            background: #dda15e;
+            color: #121212;
+        }
+
+        .combo-toggle-btn {
+            background: none;
+            border: none;
+            font-size: 13px;
+            font-weight: 700;
+            color: #bc6c25;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+            padding: 0;
+        }
+        body.dark-theme .combo-toggle-btn { color: #dda15e; }
+
+        .combo-body {
+            display: none;
+            border-top: 1px solid #eee;
+            background: #fdfdfd;
+            padding: 15px;
+            flex-direction: column;
+            gap: 12px;
+        }
+        body.dark-theme .combo-body {
+            border-top-color: #333;
+            background: #181818;
+        }
+        .combo-body.is-open {
+            display: flex;
+        }
+
+        .combo-subitem {
+            background: #fff;
+            border-radius: 6px;
+            padding: 12px 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            border: 1px solid #e8e8e8;
+            position: relative;
+        }
+        body.dark-theme .combo-subitem {
+            background: #23232a;
+            border-color: #333;
+        }
+
+        .cart-item-img {
+            width: 80px;
+            height: 100px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+        body.dark-theme .cart-item-img {
+            background: #2a2a2a;
+        }
+
+        .cart-item-details { flex-grow: 1; display: flex; flex-direction: column; gap: 6px; }
+        .cart-item-title { font-size: 16px; font-weight: 700; color: #222; }
+        body.dark-theme .cart-item-title { color: #f0f0f0; }
+
+        .cart-item-spec { font-size: 13px; color: #666; }
+        body.dark-theme .cart-item-spec { color: #aaa; }
+        .cart-item-spec strong { color: #333; }
+        body.dark-theme .cart-item-spec strong { color: #ddd; }
+
+        .cart-item-price { font-size: 16px; font-weight: 800; color: #bc6c25; margin-top: 4px; }
+        body.dark-theme .cart-item-price { color: #dda15e; }
+
+        /* Controles de Quantidade */
+        .cart-item-actions { display: flex; align-items: center; gap: 15px; margin-top: 6px; }
+        .qty-controls { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; }
+        body.dark-theme .qty-controls { border-color: #444; }
+
+        .qty-btn { width: 28px; height: 28px; background: #fff; border: none; font-weight: bold; cursor: pointer; color: #555; }
+        body.dark-theme .qty-btn { background: #2a2a2a; color: #eee; }
+        .qty-btn:hover { background: #f0f0f0; }
+        body.dark-theme .qty-btn:hover { background: #383838; }
+
+        .qty-val { width: 32px; text-align: center; font-size: 13px; font-weight: 700; }
+        body.dark-theme .qty-val { color: #fff; }
+
+        .btn-remove {
+            color: #d9534f;
+            background: none;
+            border: none;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .btn-remove:hover { text-decoration: underline; color: #c9302c; }
+        body.dark-theme .btn-remove { color: #ff6b6b; }
+
+        /* Resumo do Pedido */
+        .order-summary {
+            background: #fff;
+            border-radius: 8px;
+            padding: 24px;
+            border: 1px solid #eaeaea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        body.dark-theme .order-summary {
+            background: #1e1e1e;
+            border-color: #333;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        }
+
+        .summary-title { font-size: 18px; font-weight: 800; color: #222; margin-bottom: 20px; }
+        body.dark-theme .summary-title { color: #fff; }
+
+        .summary-row { display: flex; justify-content: space-between; font-size: 14px; color: #666; margin-bottom: 12px; }
+        body.dark-theme .summary-row { color: #aaa; }
+
+        .summary-row.total {
+            border-top: 1px solid #eee;
+            padding-top: 16px;
+            margin-top: 16px;
+            font-size: 18px;
+            font-weight: 800;
+            color: #bc6c25;
+        }
+        body.dark-theme .summary-row.total {
+            border-top-color: #333;
+            color: #dda15e;
+        }
+
+        .free-shipping { color: #1e8e3e; font-weight: 600; }
+        body.dark-theme .free-shipping { color: #4caf50; }
+
+        .btn-checkout {
+            width: 100%;
+            background: #2a9d8f;
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+        .btn-checkout:hover { background: #218377; }
+
+        /* Estado Vazio */
+        .empty-cart {
+            text-align: center;
+            padding: 60px 20px;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        body.dark-theme .empty-cart {
+            background: #1e1e1e;
+            border-color: #333;
+        }
+
+        .empty-cart h3 { font-size: 20px; color: #444; margin-bottom: 10px; }
+        body.dark-theme .empty-cart h3 { color: #fff; }
+
+        .empty-cart p { color: #777; margin-bottom: 20px; }
+        body.dark-theme .empty-cart p { color: #aaa; }
+
+        .btn-catalog {
+            display: inline-block;
+            background: #bc6c25;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">Dai&Di <span>Lingeries</span></a>
+        <div class="header-actions">
+            <a href="index.html">← Continuar Comprando</a>
+            <a href="carrinho.html">🛒 Carrinho (<span id="cart-count">0</span>)</a>
+            <button id="theme-toggle" class="theme-toggle-btn" onclick="alternarTema()" title="Alternar Tema">🌙</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 class="page-title">Seu Carrinho de Compras</h1>
+
+        <div id="cart-content"></div>
+    </div>
+
+    <script>
+        const FOTO_PADRAO = 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop';
+
+        /* Dynamic Dark Mode Logic */
+        function carregarTema() {
+            const temaSalvo = localStorage.getItem('daidi_theme') || localStorage.getItem('theme');
+            const btnTema = document.getElementById('theme-toggle');
+            
+            if (temaSalvo === 'dark') {
+                document.body.classList.add('dark-theme');
+                if (btnTema) btnTema.innerText = '☀️';
+            } else {
+                document.body.classList.remove('dark-theme');
+                if (btnTema) btnTema.innerText = '🌙';
+            }
+        }
+
+        function alternarTema() {
+            document.body.classList.toggle('dark-theme');
+            const ehEscuro = document.body.classList.contains('dark-theme');
+            
+            localStorage.setItem('daidi_theme', ehEscuro ? 'dark' : 'light');
+            
+            const btnTema = document.getElementById('theme-toggle');
+            if (btnTema) btnTema.innerText = ehEscuro ? '☀️' : '🌙';
+        }
+
+        function obterCarrinho() {
+            return JSON.parse(localStorage.getItem('daidi_cart')) || JSON.parse(localStorage.getItem('daidi_carrinho')) || [];
+        }
+
+        function salvarCarrinho(carrinho) {
+            localStorage.setItem('daidi_cart', JSON.stringify(carrinho));
+            localStorage.setItem('daidi_carrinho', JSON.stringify(carrinho));
+            renderizarCarrinho();
+            atualizarContadorHeader();
+        }
+
+        function atualizarContadorHeader() {
+            let carrinho = obterCarrinho();
+            let totalUnidades = carrinho.reduce((acc, item) => acc + (parseInt(item.quantidade) || 1), 0);
+            let elContador = document.getElementById('cart-count');
+            if (elContador) {
+                elContador.innerText = totalUnidades;
+            }
+        }
+
+        /* Validação Dinâmica de Regras de Combo */
+        function validarRegrasCombo(carrinho) {
+            let dbProdutos = JSON.parse(localStorage.getItem('daidi_produtos')) || {};
+            let contagemCombos = {};
+            let regrasCombos = {};
+
+            // Passo 1: Conta a quantidade total de itens de cada combo no carrinho e mapeia as regras
+            carrinho.forEach(item => {
+                if (item.nome && item.nome.includes('(Combo')) {
+                    let nomeBase = item.nome.split(' (Combo')[0].trim();
+                    
+                    if (!contagemCombos[nomeBase]) {
+                        contagemCombos[nomeBase] = 0;
+                        
+                        // Extrai informações do item ou busca no cadastro do produto no localStorage
+                        let promoQtd = parseInt(item.promoQtd) || 0;
+                        let precoComboUnitario = parseFloat(item.precoComboUnitario) || 0;
+                        let precoNormalUnitario = parseFloat(item.precoNormalUnitario) || 0;
+
+                        // Tenta localizar o produto no banco local se algum dado faltar
+                        for (let id in dbProdutos) {
+                            let p = dbProdutos[id];
+                            if (p.nome && nomeBase.toLowerCase().includes(p.nome.toLowerCase())) {
+                                if (!promoQtd && p.promoQtd) promoQtd = parseInt(p.promoQtd);
+                                if (!precoNormalUnitario && (p.preco || p.precoNormal)) precoNormalUnitario = parseFloat(p.preco || p.precoNormal);
+                                if (!precoComboUnitario && p.promoPrecoTotal && p.promoQtd) {
+                                    precoComboUnitario = parseFloat(p.promoPrecoTotal) / parseInt(p.promoQtd);
+                                }
+                                break;
+                            }
+                        }
+
+                        // Fallback dinâmico específico para Vestido e Calça se dados não vierem do banco
+                        if (nomeBase.toLowerCase().includes('vestido')) {
+                            if (!promoQtd) promoQtd = 5;
+                            if (!precoComboUnitario) precoComboUnitario = 69.00; // 345 / 5
+                            if (!precoNormalUnitario) precoNormalUnitario = 100.00;
+                        } else if (nomeBase.toLowerCase().includes('calça')) {
+                            if (!promoQtd) promoQtd = 4;
+                            if (!precoComboUnitario) precoComboUnitario = 122.50; // 490 / 4
+                            if (!precoNormalUnitario) precoNormalUnitario = 140.00;
+                        } else {
+                            if (!promoQtd) promoQtd = 4;
+                            if (!precoComboUnitario && item.preco) precoComboUnitario = parseFloat(item.preco);
+                            if (!precoNormalUnitario) precoNormalUnitario = precoComboUnitario * 1.2;
+                        }
+
+                        regrasCombos[nomeBase] = {
+                            promoQtd: promoQtd,
+                            precoComboUnitario: precoComboUnitario,
+                            precoNormalUnitario: precoNormalUnitario
+                        };
+                    }
+
+                    contagemCombos[nomeBase] += parseInt(item.quantidade) || 1;
+                }
+            });
+
+            // Passo 2: Recalcula o valor de cada item de acordo com a meta do combo atingida
+            carrinho.forEach(item => {
+                if (item.nome && item.nome.includes('(Combo')) {
+                    let nomeBase = item.nome.split(' (Combo')[0].trim();
+                    let regra = regrasCombos[nomeBase];
+                    let qtdTotalNoCarrinho = contagemCombos[nomeBase];
+                    let qtdItem = parseInt(item.quantidade) || 1;
+
+                    if (regra) {
+                        item.promoQtd = regra.promoQtd;
+                        item.precoComboUnitario = regra.precoComboUnitario;
+                        item.precoNormalUnitario = regra.precoNormalUnitario;
+
+                        // Se a quantidade no carrinho for idêntica à exigida pelo combo, usa o valor de combo
+                        if (qtdTotalNoCarrinho === regra.promoQtd) {
+                            item.preco = regra.precoComboUnitario * qtdItem;
+                        } else {
+                            // Se a quantidade foi alterada para mais ou menos, aplica o preço cheio unitário
+                            item.preco = regra.precoNormalUnitario * qtdItem;
+                        }
+                    }
+                }
+            });
+
+            return carrinho;
+        }
+
+        function toggleComboDetails(comboId) {
+            let comboBody = document.getElementById(comboId);
+            let arrowSpan = document.getElementById('arrow-' + comboId);
+            if (comboBody) {
+                comboBody.classList.toggle('is-open');
+                if (arrowSpan) {
+                    arrowSpan.innerText = comboBody.classList.contains('is-open') ? '▲' : '▼';
+                }
+            }
+        }
+
+        function alterarQtd(index, delta) {
+            let carrinho = obterCarrinho();
+            if (!carrinho[index]) return;
+
+            let qtdAtual = parseInt(carrinho[index].quantidade) || 1;
+            let novaQtd = qtdAtual + delta;
+
+            if (novaQtd <= 0) {
+                removerItem(index);
+                return;
+            }
+
+            if (!carrinho[index].nome.includes('(Combo')) {
+                let precoUnitario = carrinho[index].preco / qtdAtual;
+                carrinho[index].preco = precoUnitario * novaQtd;
+            }
+            
+            carrinho[index].quantidade = novaQtd;
+
+            carrinho = validarRegrasCombo(carrinho);
+            salvarCarrinho(carrinho);
+        }
+
+        function removerItem(index) {
+            let carrinho = obterCarrinho();
+            carrinho.splice(index, 1);
+            
+            carrinho = validarRegrasCombo(carrinho);
+            salvarCarrinho(carrinho);
+        }
+
+        function removerComboInteiro(nomeBaseCombo) {
+            let carrinho = obterCarrinho();
+            carrinho = carrinho.filter(item => !(item.nome && item.nome.startsWith(nomeBaseCombo) && item.nome.includes('(Combo')));
+            carrinho = validarRegrasCombo(carrinho);
+            salvarCarrinho(carrinho);
+        }
+
+        function irParaPagamento() {
+            let carrinho = obterCarrinho();
+            if (carrinho.length === 0) {
+                alert('Seu carrinho está vazio!');
+                return;
+            }
+            window.location.href = 'checkout.html';
+        }
+
+        function renderizarCarrinho() {
+            let carrinho = obterCarrinho();
+            let container = document.getElementById('cart-content');
+
+            if (carrinho.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <h3>Seu carrinho está vazio</h3>
+                        <p>Você ainda não adicionou nenhum produto ao seu carrinho.</p>
+                        <a href="index.html" class="btn-catalog">Ver Produtos</a>
+                    </div>
+                `;
+                return;
+            }
+
+            let subtotalGeral = 0;
+            let gruposCombos = {};
+            let itensAvulsos = [];
+
+            // Separa os itens entre combos agrupados e produtos avulsos
+            carrinho.forEach((item, index) => {
+                let itemComIndex = { ...item, originalIndex: index };
+                
+                if (item.nome && item.nome.includes('(Combo')) {
+                    let nomeBase = item.nome.split(' (Combo')[0].trim();
+                    if (!gruposCombos[nomeBase]) {
+                        gruposCombos[nomeBase] = [];
+                    }
+                    gruposCombos[nomeBase].push(itemComIndex);
+                } else {
+                    itensAvulsos.push(itemComIndex);
+                }
+            });
+
+            let itensHTML = '';
+
+            // 1. RENDERIZA OS COMBOS AGRUPADOS
+            let comboIdCounter = 0;
+            for (let nomeBase in gruposCombos) {
+                comboIdCounter++;
+                let listaItensCombo = gruposCombos[nomeBase];
+                let totalQtdCombo = 0;
+                let valorTotalCombo = 0;
+                let subItensHTML = '';
+
+                listaItensCombo.forEach(subItem => {
+                    let precoSubItem = parseFloat(subItem.preco || 0);
+                    let qtdSubItem = parseInt(subItem.quantidade) || 1;
+                    totalQtdCombo += qtdSubItem;
+                    valorTotalCombo += precoSubItem;
+
+                    let txtTamanho = subItem.tamanho && subItem.tamanho !== 'undefined' ? `Tamanho: <strong>${subItem.tamanho}</strong>` : 'Tamanho: <strong>Único</strong>';
+                    let imagemUrlSub = subItem.imagem || FOTO_PADRAO;
+
+                    subItensHTML += `
+                        <div class="combo-subitem">
+                            <img src="${imagemUrlSub}" class="cart-item-img" style="width: 50px; height: 65px;" alt="${subItem.nome}">
+                            <div class="cart-item-details">
+                                <div class="cart-item-title" style="font-size: 14px;">${subItem.nome}</div>
+                                <div class="cart-item-spec">${txtTamanho}</div>
+                                <div class="cart-item-actions">
+                                    <div class="qty-controls">
+                                        <button class="qty-btn" onclick="alterarQtd(${subItem.originalIndex}, -1)">-</button>
+                                        <span class="qty-val">${qtdSubItem}</span>
+                                        <button class="qty-btn" onclick="alterarQtd(${subItem.originalIndex}, 1)">+</button>
+                                    </div>
+                                </div>
+                                <div class="cart-item-price" style="font-size: 14px;">R$ ${precoSubItem.toFixed(2).replace('.', ',')}</div>
+                            </div>
+                            <button class="btn-remove" style="top: 12px; right: 12px;" onclick="removerItem(${subItem.originalIndex})">Remover</button>
+                        </div>
+                    `;
+                });
+
+                subtotalGeral += valorTotalCombo;
+                let imagemComboPrincipal = listaItensCombo[0].imagem || FOTO_PADRAO;
+                let idComboElement = `combo-group-${comboIdCounter}`;
+
+                itensHTML += `
+                    <div class="cart-item-combo">
+                        <div class="combo-header" onclick="toggleComboDetails('${idComboElement}')">
+                            <img src="${imagemComboPrincipal}" class="cart-item-img" alt="${nomeBase}" onerror="this.onerror=null; this.src='${FOTO_PADRAO}';">
+                            <div class="cart-item-details">
+                                <div>
+                                    <span class="combo-badge">Combo Promocional</span>
+                                </div>
+                                <div class="cart-item-title">Combo ${nomeBase} (${totalQtdCombo} Peças)</div>
+                                <div class="cart-item-price">R$ ${valorTotalCombo.toFixed(2).replace('.', ',')}</div>
+                                <button type="button" class="combo-toggle-btn">
+                                    <span id="arrow-${idComboElement}">▼</span> Ver/Editar Peças do Combo
+                                </button>
+                            </div>
+                            <button class="btn-remove" onclick="event.stopPropagation(); removerComboInteiro('${nomeBase}')">Remover Combo</button>
+                        </div>
+                        <div class="combo-body" id="${idComboElement}">
+                            ${subItensHTML}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 2. RENDERIZA OS ITENS AVULSOS
+            itensAvulsos.forEach(item => {
+                let precoItem = parseFloat(item.preco || 0);
+                subtotalGeral += precoItem;
+
+                let txtTamanho = '';
+                if (item.tamanho && item.tamanho !== 'undefined') {
+                    txtTamanho = `Tamanho: <strong>${item.tamanho}</strong>`;
+                } else if ((item.tamanhoBlusa && item.tamanhoBlusa !== 'undefined') || (item.tamanhoShorts && item.tamanhoShorts !== 'undefined')) {
+                    let b = item.tamanhoBlusa && item.tamanhoBlusa !== 'undefined' ? item.tamanhoBlusa : '-';
+                    let s = item.tamanhoShorts && item.tamanhoShorts !== 'undefined' ? item.tamanhoShorts : '-';
+                    txtTamanho = `Tamanho Blusa: <strong>${b}</strong> | Tamanho Shorts: <strong>${s}</strong>`;
+                } else {
+                    txtTamanho = `Tamanho: <strong>Único</strong>`;
+                }
+
+                let imagemUrl = item.imagem || FOTO_PADRAO;
+                let quantidade = parseInt(item.quantidade) || 1;
+
+                itensHTML += `
+                    <div class="cart-item">
+                        <img src="${imagemUrl}" class="cart-item-img" alt="${item.nome}" onerror="this.onerror=null; this.src='${FOTO_PADRAO}';">
+                        <div class="cart-item-details">
+                            <div class="cart-item-title">${item.nome || 'Produto'}</div>
+                            <div class="cart-item-spec">${txtTamanho}</div>
+                            <div class="cart-item-actions">
+                                <div class="qty-controls">
+                                    <button class="qty-btn" onclick="alterarQtd(${item.originalIndex}, -1)">-</button>
+                                    <span class="qty-val">${quantidade}</span>
+                                    <button class="qty-btn" onclick="alterarQtd(${item.originalIndex}, 1)">+</button>
+                                </div>
+                            </div>
+                            <div class="cart-item-price">R$ ${precoItem.toFixed(2).replace('.', ',')}</div>
+                        </div>
+                        <button class="btn-remove" onclick="removerItem(${item.originalIndex})">Remover</button>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = `
+                <div class="cart-grid">
+                    <div class="cart-items-list">
+                        ${itensHTML}
+                    </div>
+
+                    <div class="order-summary">
+                        <h2 class="summary-title">Resumo do Pedido</h2>
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span>R$ ${subtotalGeral.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Frete</span>
+                            <span class="free-shipping">Calculado no pagamento</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total</span>
+                            <span>R$ ${subtotalGeral.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        <button class="btn-checkout" onclick="irParaPagamento()">Ir para o Pagamento</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Execução ao carregar a página
+        carregarTema();
+        let carrinhoInicial = obterCarrinho();
+        if (carrinhoInicial.length > 0) {
+            carrinhoInicial = validarRegrasCombo(carrinhoInicial);
+        }
+        salvarCarrinho(carrinhoInicial);
+
+    </script>
+</body>
+</html>

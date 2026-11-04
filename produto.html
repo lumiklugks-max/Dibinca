@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dai&Di Lingeries - Produto</title>
+    <style>
+        /* Variáveis de transição e fontes */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #fcfcfc; color: #333; transition: background-color 0.3s, color 0.3s; }
+
+        /* Header */
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 5%; background: #fff; border-bottom: 1px solid #eee;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .logo { font-size: 24px; font-weight: 800; color: #111; text-decoration: none; transition: color 0.3s; }
+        .logo span { color: #bc6c25; }
+        .header-actions { display: flex; align-items: center; gap: 20px; }
+        .header-actions a { text-decoration: none; color: #444; font-weight: 500; font-size: 14px; transition: color 0.3s; }
+        .header-actions a:hover { color: #bc6c25; }
+
+        .user-avatar-btn {
+            width: 42px; height: 42px; border-radius: 50%; border: 2px solid #eaeaea; 
+            cursor: pointer; object-fit: cover; transition: all 0.2s;
+        }
+        .user-avatar-btn:hover { border-color: #bc6c25; transform: scale(1.05); }
+
+        /* Aba Lateral (Sidebar) do Usuário */
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.4); z-index: 998; opacity: 0;
+            visibility: hidden; transition: 0.3s ease;
+        }
+        .sidebar-overlay.open { opacity: 1; visibility: visible; }
+
+        .user-sidebar {
+            position: fixed; top: 0; right: -350px; width: 320px; height: 100vh;
+            background: #fff; z-index: 999; box-shadow: -4px 0 15px rgba(0,0,0,0.05);
+            transition: right 0.3s ease, background-color 0.3s; display: flex; flex-direction: column;
+        }
+        .user-sidebar.open { right: 0; }
+
+        .sidebar-header {
+            padding: 25px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px; position: relative;
+        }
+        .sidebar-header img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #bc6c25; }
+        .sidebar-header-info { display: flex; flex-direction: column; }
+        .sidebar-header-info h3 { font-size: 16px; margin-bottom: 2px; }
+        .sidebar-header-info span { font-size: 13px; color: #777; }
+        
+        .close-sidebar {
+            position: absolute; top: 15px; right: 20px; background: none; border: none;
+            font-size: 20px; cursor: pointer; color: #999; transition: 0.2s;
+        }
+        .close-sidebar:hover { color: #e63946; }
+
+        .sidebar-menu { list-style: none; flex-grow: 1; padding: 15px 0; overflow-y: auto; }
+        .sidebar-menu li { border-bottom: 1px solid #f5f5f5; }
+        .sidebar-menu a {
+            display: flex; align-items: center; gap: 15px; padding: 15px 25px; text-decoration: none;
+            color: #444; font-weight: 500; font-size: 15px; transition: 0.2s;
+        }
+        .sidebar-menu a:hover { background: #faf6f3; color: #bc6c25; padding-left: 30px; }
+        
+        /* Botão do Tema Claro/Escuro na Sidebar */
+        .theme-toggle-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 25px; border-top: 1px solid #eee; margin-top: auto;
+        }
+        .theme-toggle-row span { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        
+        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #bc6c25; }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        .logout-btn { display: block; width: 100%; text-align: center; padding: 15px; background: #f9f9f9; color: #d9534f; font-weight: bold; border: none; cursor: pointer; transition: 0.2s; }
+        .logout-btn:hover { background: #ffeeee; }
+
+        /* Estilos do Modo Escuro */
+        body.dark-mode { background-color: #121212; color: #e0e0e0; }
+        body.dark-mode header { background: #1e1e1e; border-color: #333; }
+        body.dark-mode .header-actions a { color: #e0e0e0; }
+        body.dark-mode .logo { color: #fff; }
+        body.dark-mode .product-detail-grid { background: #1a1a1a; }
+        body.dark-mode .main-image-box { background: #222; }
+        body.dark-mode .product-title { color: #fff; }
+        body.dark-mode .selector-title { color: #ccc; }
+        body.dark-mode .color-btn { background: #222; border-color: #444; color: #ccc; }
+        body.dark-mode .color-btn.active { background: #bc6c25; color: #fff; border-color: #bc6c25; }
+        
+        body.dark-mode .size-btn { background: #222; border-color: #444; color: #ccc; }
+        body.dark-mode .size-btn.active { background: #e0e0e0; color: #111; border-color: #e0e0e0; }
+        body.dark-mode .size-btn.disabled { background: #1a1a1a; color: #555; border-color: #333; }
+        body.dark-mode .size-btn.active .size-btn-stock { color: #444; }
+        
+        body.dark-mode .coupon-box { background: #222; border-color: #444; }
+        body.dark-mode .coupon-box label { color: #e0e0e0; }
+        body.dark-mode #input-cupom { background: #111; color: #fff; border-color: #444; }
+        body.dark-mode .qty-selector { border-color: #444; }
+        body.dark-mode .qty-btn, body.dark-mode .qty-input { background: #222; color: #fff; }
+        body.dark-mode .qty-btn:hover { background: #333; }
+        body.dark-mode .promo-card { background: #1a1a1a; border-color: #bc6c25; }
+        body.dark-mode .promo-card.active { background: #2a1c11; }
+        body.dark-mode .combo-customizer { background: #1e1e1e; border-color: #333; }
+        body.dark-mode .combo-item-row { background: #1a1a1a; border-color: #333; }
+        body.dark-mode .combo-item-field select { background: #222; color: #fff; border-color: #444; }
+        body.dark-mode .combo-item-field label { color: #aaa; }
+        
+        body.dark-mode .user-sidebar { background: #1a1a1a; border-left: 1px solid #333; }
+        body.dark-mode .sidebar-header { border-bottom-color: #333; }
+        body.dark-mode .sidebar-header-info h3 { color: #fff; }
+        body.dark-mode .sidebar-menu li { border-bottom-color: #222; }
+        body.dark-mode .sidebar-menu a { color: #ccc; }
+        body.dark-mode .sidebar-menu a:hover { background: #222; }
+        body.dark-mode .theme-toggle-row { border-top-color: #333; }
+        body.dark-mode .logout-btn { background: #111; }
+        body.dark-mode .logout-btn:hover { background: #2a1111; }
+        
+        .combo-item-field select option:disabled { color: #aaa; background: #f5f5f5; font-style: italic; cursor: not-allowed; }
+        body.dark-mode .combo-item-field select option:disabled { color: #555; background: #1a1a1a; }
+
+        /* Estilos do Conteúdo */
+        .breadcrumbs { max-width: 1200px; margin: 20px auto 0; padding: 0 20px; font-size: 13px; color: #777; }
+        .breadcrumbs a { color: #777; text-decoration: none; }
+        .breadcrumbs a:hover { text-decoration: underline; }
+        .container { max-width: 1200px; margin: 20px auto 60px; padding: 0 20px; }
+        
+        .product-detail-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; background: #fff; padding: 20px 0; border-radius: 8px; transition: 0.3s; }
+        @media (max-width: 900px) { .product-detail-grid { grid-template-columns: 1fr; } }
+
+        .main-image-box { width: 100%; background: #f9f9f9; border-radius: 6px; overflow: hidden; }
+        .main-image-box img { width: 100%; height: auto; aspect-ratio: 3/4; object-fit: cover; display: block; transition: opacity 0.3s ease; }
+
+        .info-column { display: flex; flex-direction: column; gap: 16px; }
+        .product-title { font-size: 24px; font-weight: 700; color: #222; line-height: 1.2; }
+        .product-ref { font-size: 13px; color: #888; margin-top: -8px; }
+
+        .price-section { display: flex; flex-direction: column; gap: 4px; }
+        .price-old { font-size: 14px; color: #999; text-decoration: line-through; }
+        .price-pix { font-size: 28px; font-weight: 800; color: #1e8e3e; display: flex; align-items: baseline; gap: 6px; }
+        .price-pix span { font-size: 14px; font-weight: 500; color: #666; }
+        .price-installments { font-size: 13px; color: #555; }
+        .unit-indicator { font-size: 12px; color: #888; margin-top: -2px; }
+
+        .selector-title { font-size: 13px; font-weight: 700; margin-top: 5px; }
+        .color-options, .size-options { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+        .color-btn { padding: 8px 14px; border: 1px solid #ccc; background: #fff; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .color-btn.active { border-color: #bc6c25; background: #fffcf7; color: #bc6c25; font-weight: 800; }
+        
+        .size-btn { 
+            min-width: 44px; height: 44px; padding: 4px 10px; 
+            border: 1px solid #ccc; background: #fff; border-radius: 4px; 
+            font-weight: 700; font-size: 13px; cursor: pointer; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+        }
+        .size-btn.active { background: #000; color: #fff; border-color: #000; }
+        .size-btn.disabled { background: #f5f5f5; color: #ccc; cursor: not-allowed; text-decoration: line-through; }
+        .size-btn-stock { font-size: 10px; font-weight: normal; color: #777; }
+        .size-btn.active .size-btn-stock { color: #ccc; }
+
+        .coupon-box { border: 1px dashed #ccc; background: #fafafa; border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 10px; transition: 0.3s; }
+        
+        .action-row { display: flex; gap: 12px; margin-top: 5px; }
+        .qty-selector { display: flex; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; width: 100px; height: 48px; }
+        .qty-btn { width: 32px; background: #fff; border: none; font-size: 16px; font-weight: bold; cursor: pointer; color: #555; }
+        .qty-input { width: 36px; border: none; text-align: center; font-weight: 700; font-size: 14px; outline: none; }
+        .buy-btn { flex-grow: 1; background: #000; color: #fff; border: none; height: 48px; border-radius: 4px; font-size: 15px; font-weight: 800; letter-spacing: 1px; cursor: pointer; transition: background 0.2s; }
+        .buy-btn:hover { background: #bc6c25; }
+
+        .wishlist-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #666; text-decoration: none; margin-top: 5px; cursor: pointer; }
+        .wishlist-link:hover { color: #e63946; }
+
+        .promo-card { border: 2px dashed #bc6c25; background: #fffcf7; border-radius: 8px; padding: 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
+        .promo-card.active { border-color: #bc6c25; background: #faf6f3; border-style: solid; }
+        .promo-card-btn { background: #bc6c25; color: #fff; border: none; padding: 8px 14px; border-radius: 4px; font-size: 12px; font-weight: 700; cursor: pointer; }
+        
+        .combo-customizer { border: 1px solid #e2d1c3; background: #faf6f3; padding: 20px; border-radius: 8px; margin-top: 10px; display: none; flex-direction: column; gap: 15px; transition: 0.3s; }
+        .combo-customizer.open { display: flex; }
+        .combo-customizer-title { font-size: 15px; font-weight: 800; color: #bc6c25; border-bottom: 1px solid #e2d1c3; padding-bottom: 10px; margin-bottom: 5px; }
+        .combo-item-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #eaeaea; }
+        .combo-item-field { display: flex; flex-direction: column; gap: 6px; }
+        .combo-item-field label { font-size: 12px; font-weight: 700; }
+        .combo-item-field select { padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; outline: none; cursor: pointer; transition: all 0.2s; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">Dai&Di <span>Lingeries</span></a>
+        <div class="header-actions">
+            <a href="index.html">Catálogo</a>
+            <a href="carrinho.html">🛒 (<span id="cart-count">0</span>)</a>
+            <img src="https://lh3.googleusercontent.com/a/default-user=s40-c" alt="Seu Perfil" class="user-avatar-btn" onclick="toggleSidebar()">
+        </div>
+    </header>
+
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <aside class="user-sidebar" id="user-sidebar">
+        <div class="sidebar-header">
+            <img src="https://lh3.googleusercontent.com/a/default-user=s40-c" alt="Foto Padrão">
+            <div class="sidebar-header-info">
+                <h3>Olá, Visitante!</h3>
+                <span>Sua conta Dai&Di</span>
+            </div>
+            <button class="close-sidebar" onclick="toggleSidebar()">✖</button>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li><a href="#">📦 Meus Pedidos</a></li>
+            <li><a href="#">❤️ Meus Favoritos</a></li>
+            <li><a href="#">🎟️ Meus Cupons</a></li>
+            <li><a href="#">⚙️ Minha Conta</a></li>
+            <li><a href="#">💬 Suporte / Contato</a></li>
+        </ul>
+
+        <div class="theme-toggle-row">
+            <span>🌙 Modo Escuro</span>
+            <label class="switch">
+                <input type="checkbox" id="theme-switch" onchange="toggleTheme()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <button class="logout-btn">Sair da Conta</button>
+    </aside>
+
+    <div class="breadcrumbs">
+        <a href="index.html">Home</a> &gt; <a href="index.html">Catálogo</a> &gt; <span id="bc-title">Produto</span>
+    </div>
+
+    <div class="container" id="main-content"></div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('user-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+
+        function toggleTheme() {
+            const isDark = document.getElementById('theme-switch').checked;
+            if(isDark) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('daidi_theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('daidi_theme', 'light');
+            }
+        }
+
+        window.onload = () => {
+            if(localStorage.getItem('daidi_theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('theme-switch').checked = true;
+            }
+        };
+
+        const FOTO_PADRAO = 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop';
+        
+        let produtoAtual = null; let corSelecionada = null; let tamanhoSelecionado = '';
+        let quantidadeSelecionada = 1; let precoNormalUnitario = 0; let precoUnitarioBase = 0;
+        let cupomDescontoAtivo = 0; let comboManualAtivo = false; let itensComboCustomizados = [];
+
+        function buscarProdutoPorId(id) {
+            let db = JSON.parse(localStorage.getItem('daidi_produtos')) || {};
+            return db[id] || null;
+        }
+
+        function selecionarCor(indexCor) {
+            corSelecionada = produtoAtual.variantes[indexCor];
+            document.querySelectorAll('.color-btn').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx === indexCor);
+            });
+            const imgEl = document.getElementById('main-img');
+            imgEl.style.opacity = '0.5';
+            setTimeout(() => { imgEl.src = corSelecionada.imagem || FOTO_PADRAO; imgEl.style.opacity = '1'; }, 150);
+            renderizarTamanhos();
+        }
+
+        function renderizarTamanhos() {
+            const container = document.getElementById('size-options-box');
+            container.innerHTML = ''; tamanhoSelecionado = '';
+            const tamanhos = ['P', 'M', 'G', 'GG'];
+            
+            tamanhos.forEach(tam => {
+                let est = corSelecionada.estoque[tam] || 0;
+                if (est <= 0) {
+                    container.innerHTML += `<button class="size-btn disabled" disabled title="Esgotado">
+                        <div>${tam}</div>
+                        <div class="size-btn-stock">(0)</div>
+                    </button>`;
+                } else {
+                    container.innerHTML += `<button class="size-btn" onclick="selecionarTamanho(this, '${tam}')" title="${est} disponíveis">
+                        <div>${tam}</div>
+                        <div class="size-btn-stock">(${est})</div>
+                    </button>`;
+                }
+            });
+        }
+
+        function selecionarTamanho(btn, tam) {
+            document.querySelectorAll('#size-options-box .size-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active'); tamanhoSelecionado = tam;
+        }
+
+        function alterarQtd(delta) {
+            if (comboManualAtivo) return; 
+            let novaQtd = quantidadeSelecionada + delta;
+            if (novaQtd >= 1) { quantidadeSelecionada = novaQtd; recalcularPrecoTela(); }
+        }
+
+        function alternarCombo() {
+            comboManualAtivo = !comboManualAtivo;
+            const custBox = document.getElementById('combo-customizer-box');
+            const cardPromo = document.getElementById('promo-card-box');
+            const btnCard = document.getElementById('promo-card-btn-txt');
+
+            if (comboManualAtivo) {
+                cardPromo.classList.add('active'); custBox.classList.add('open'); btnCard.innerText = '✓ APLICADO';
+                quantidadeSelecionada = parseInt(produtoAtual.promoQtd); 
+                gerarCamposCustomizacaoCombo();
+            } else {
+                cardPromo.classList.remove('active'); custBox.classList.remove('open'); btnCard.innerText = 'MONTAR COMBO';
+                quantidadeSelecionada = 1;
+            }
+            recalcularPrecoTela();
+        }
+
+        function gerarCamposCustomizacaoCombo() {
+            const container = document.getElementById('combo-items-list');
+            container.innerHTML = ''; 
+            const qtdCombo = produtoAtual.promoQtd; 
+            itensComboCustomizados = [];
+
+            for (let i = 0; i < qtdCombo; i++) {
+                itensComboCustomizados.push({ corIndex: 0, tamanho: '' });
+            }
+
+            for (let i = 0; i < qtdCombo; i++) {
+                let coresHTML = produtoAtual.variantes.map((v, idx) => `<option value="${idx}">${v.cor}</option>`).join('');
+                container.innerHTML += `
+                    <div class="combo-item-row">
+                        <div class="combo-item-field">
+                            <label>Peça #${i+1} - Cor/Estampa</label>
+                            <select onchange="atualizarItemCombo(${i}, 'corIndex', this.value)">${coresHTML}</select>
+                        </div>
+                        <div class="combo-item-field">
+                            <label>Peça #${i+1} - Tamanho</label>
+                            <select id="combo-tamanho-${i}" onchange="atualizarItemCombo(${i}, 'tamanho', this.value)"></select>
+                        </div>
+                    </div>`;
+            }
+            renderizarDropdownsCombo();
+        }
+
+        function renderizarDropdownsCombo() {
+            const tamanhos = ['P', 'M', 'G', 'GG'];
+
+            for (let i = 0; i < produtoAtual.promoQtd; i++) {
+                let itemAtual = itensComboCustomizados[i];
+                let selectTamanho = document.getElementById(`combo-tamanho-${i}`);
+                if (!selectTamanho) continue;
+
+                let corIndex = itemAtual.corIndex;
+                let cor = produtoAtual.variantes[corIndex];
+                
+                // Contabiliza apenas os outros slots que já foram definidos
+                let escolhasOutros = {};
+                for (let j = 0; j < produtoAtual.promoQtd; j++) {
+                    if (i === j) continue;
+                    let outroItem = itensComboCustomizados[j];
+                    if (outroItem.corIndex === corIndex && outroItem.tamanho) {
+                        escolhasOutros[outroItem.tamanho] = (escolhasOutros[outroItem.tamanho] || 0) + 1;
+                    }
+                }
+
+                let html = '';
+                let primeiroDisponivel = '';
+
+                tamanhos.forEach(tam => {
+                    let estoqueTotal = cor.estoque[tam] || 0;
+                    let estoqueUsado = escolhasOutros[tam] || 0;
+                    let estoqueRestante = estoqueTotal - estoqueUsado;
+
+                    if (estoqueRestante <= 0) {
+                        html += `<option value="${tam}" disabled>${tam} (Esgotado)</option>`;
+                    } else {
+                        html += `<option value="${tam}">${tam} (${estoqueRestante} disp.)</option>`;
+                        if (!primeiroDisponivel) primeiroDisponivel = tam;
+                    }
+                });
+
+                selectTamanho.innerHTML = html;
+
+                // Verifica se a opção atual ainda é válida e disponível
+                let op = selectTamanho.querySelector(`option[value="${itemAtual.tamanho}"]`);
+                if (op && !op.disabled && itemAtual.tamanho !== '') {
+                    selectTamanho.value = itemAtual.tamanho;
+                } else if (primeiroDisponivel) {
+                    selectTamanho.value = primeiroDisponivel;
+                    itemAtual.tamanho = primeiroDisponivel;
+                } else {
+                    selectTamanho.value = '';
+                    itemAtual.tamanho = '';
+                }
+            }
+        }
+
+        function atualizarItemCombo(index, campo, valor) {
+            if (campo === 'corIndex') {
+                itensComboCustomizados[index].corIndex = parseInt(valor);
+                itensComboCustomizados[index].tamanho = '';
+            } else {
+                itensComboCustomizados[index].tamanho = valor;
+            }
+            renderizarDropdownsCombo();
+        }
+
+        function aplicarCupomProduto() {
+            let codigo = document.getElementById('input-cupom').value.trim().toUpperCase();
+            let cupons = JSON.parse(localStorage.getItem('daidi_cupons')) || [];
+            let cupomEncontrado = cupons.find(c => c.codigo === codigo);
+            let msg = document.getElementById('msg-cupom');
+
+            if (codigo === '') {
+                msg.style.color = '#d9534f'; msg.innerText = 'Digite um código de cupom.';
+                cupomDescontoAtivo = 0; recalcularPrecoTela(); return;
+            }
+
+            if (cupomEncontrado) {
+                cupomDescontoAtivo = parseFloat(cupomEncontrado.desconto);
+                msg.style.color = '#1e8e3e'; msg.innerText = `Sucesso! Cupom de ${cupomEncontrado.desconto}% aplicado.`;
+                recalcularPrecoTela();
+            } else {
+                cupomDescontoAtivo = 0; msg.style.color = '#d9534f';
+                msg.innerText = 'Cupom inválido, expirado ou não cadastrado.'; recalcularPrecoTela();
+            }
+        }
+
+        function recalcularPrecoTela() {
+            if (!produtoAtual) return;
+            let precoTotal = 0; let precoOriginalTotal = 0;
+
+            if (comboManualAtivo && produtoAtual.promoPrecoTotal) {
+                precoTotal = parseFloat(produtoAtual.promoPrecoTotal); precoOriginalTotal = precoNormalUnitario * produtoAtual.promoQtd;
+            } else {
+                precoTotal = precoUnitarioBase * quantidadeSelecionada; precoOriginalTotal = precoNormalUnitario * quantidadeSelecionada;
+            }
+
+            if (cupomDescontoAtivo > 0) precoTotal = precoTotal * (1 - cupomDescontoAtivo / 100);
+
+            const elPrecoOld = document.getElementById('display-preco-old');
+            const elPrecoPix = document.getElementById('display-preco-pix');
+            const elParcela = document.getElementById('display-parcela');
+            const elIndicador = document.getElementById('display-indicador-qtd');
+            const elQtdInput = document.getElementById('qty-input');
+            const botoesQtd = document.querySelectorAll('.qty-btn');
+
+            if (elQtdInput) elQtdInput.value = quantidadeSelecionada;
+            if (comboManualAtivo) { botoesQtd.forEach(b => { b.style.opacity = '0.3'; b.style.cursor = 'not-allowed'; }); } 
+            else { botoesQtd.forEach(b => { b.style.opacity = '1'; b.style.cursor = 'pointer'; }); }
+
+            if (elPrecoOld) {
+                if (precoNormalUnitario > precoUnitarioBase || comboManualAtivo) {
+                    elPrecoOld.innerText = `R$ ${precoOriginalTotal.toFixed(2).replace('.', ',')}`; elPrecoOld.style.display = 'block';
+                } else { elPrecoOld.style.display = 'none'; }
+            }
+
+            if (elPrecoPix) elPrecoPix.innerText = `R$ ${precoTotal.toFixed(2).replace('.', ',')}`;
+            if (elParcela) elParcela.innerText = `R$ ${(precoTotal / 4).toFixed(2).replace('.', ',')}`;
+            if (elIndicador) {
+                if (quantidadeSelecionada > 1 && !comboManualAtivo) {
+                    elIndicador.innerText = `(${quantidadeSelecionada} unidades - R$ ${(precoTotal / quantidadeSelecionada).toFixed(2).replace('.', ',')} cada)`;
+                } else { elIndicador.innerText = ''; }
+            }
+        }
+
+        function adicionarAoCarrinho() {
+            let carrinho = JSON.parse(localStorage.getItem('daidi_cart')) || [];
+            let multiplicadorCupom = 1 - (cupomDescontoAtivo / 100);
+            let estoqueAtualizado = false;
+
+            if (comboManualAtivo) {
+                // 1. Verifica se todos os seletores possuem tamanho definido
+                let campoSemTamanho = itensComboCustomizados.some(item => !item.tamanho);
+                if (campoSemTamanho) {
+                    alert('Atenção: Uma ou mais peças do combo não possuem tamanho disponível.');
+                    return;
+                }
+
+                // 2. Validação Cumulativa de Estoque antes da adição
+                let demandaAcumulada = {};
+                for (let item of itensComboCustomizados) {
+                    let chave = `${item.corIndex}_${item.tamanho}`;
+                    demandaAcumulada[chave] = (demandaAcumulada[chave] || 0) + 1;
+                }
+
+                for (let chave in demandaAcumulada) {
+                    let [corIdx, tam] = chave.split('_');
+                    let variante = produtoAtual.variantes[corIdx];
+                    let disponivel = variante.estoque[tam] || 0;
+                    let solicitado = demandaAcumulada[chave];
+
+                    if (solicitado > disponivel) {
+                        alert(`Estoque insuficiente! Você selecionou ${solicitado} unidade(s) do tamanho ${tam} na cor ${variante.cor}, mas há apenas ${disponivel} disponível(is).`);
+                        return;
+                    }
+                }
+
+                // 3. Processa a inclusão no carrinho e atualiza o estoque
+                let precoUnitCombo = (parseFloat(produtoAtual.promoPrecoTotal) / produtoAtual.promoQtd) * multiplicadorCupom;
+                itensComboCustomizados.forEach((item, idx) => {
+                    let varCor = produtoAtual.variantes[item.corIndex];
+                    carrinho.push({
+                        id: `${produtoAtual.id}_combo_${Date.now()}_${idx}`, 
+                        nome: `${produtoAtual.nome} (Combo - Cor: ${varCor.cor})`,
+                        preco: precoUnitCombo, 
+                        tamanho: item.tamanho, 
+                        quantidade: 1, 
+                        imagem: varCor.imagem || FOTO_PADRAO
+                    });
+                    
+                    produtoAtual.variantes[item.corIndex].estoque[item.tamanho] -= 1;
+                    estoqueAtualizado = true;
+                });
+
+                alert(`Combo adicionado ao carrinho com sucesso!`);
+                
+            } else {
+                if (!tamanhoSelecionado) { alert('Por favor, selecione um tamanho antes de comprar!'); return; }
+                
+                let estoqueDisponivel = corSelecionada.estoque[tamanhoSelecionado] || 0;
+                if (quantidadeSelecionada > estoqueDisponivel) {
+                    alert(`Estoque insuficiente! Temos apenas ${estoqueDisponivel} unidade(s) do tamanho ${tamanhoSelecionado}.`);
+                    return;
+                }
+
+                let precoFinalUnitario = precoUnitarioBase * multiplicadorCupom;
+                let idItem = `${produtoAtual.id}_${corSelecionada.cor.replace(/\s/g, '')}`;
+                let indexExistente = carrinho.findIndex(item => item.id === idItem && item.tamanho === tamanhoSelecionado);
+
+                if (indexExistente > -1) {
+                    carrinho[indexExistente].quantidade += quantidadeSelecionada;
+                    carrinho[indexExistente].preco = precoFinalUnitario * carrinho[indexExistente].quantidade;
+                } else {
+                    carrinho.push({
+                        id: idItem, 
+                        nome: `${produtoAtual.nome} (Cor: ${corSelecionada.cor})`, 
+                        preco: precoFinalUnitario * quantidadeSelecionada,
+                        tamanho: tamanhoSelecionado, 
+                        quantidade: quantidadeSelecionada, 
+                        imagem: corSelecionada.imagem || FOTO_PADRAO
+                    });
+                }
+                
+                corSelecionada.estoque[tamanhoSelecionado] -= quantidadeSelecionada;
+                estoqueAtualizado = true;
+
+                alert(`${quantidadeSelecionada}x "${produtoAtual.nome}" adicionado ao carrinho!`);
+            }
+            
+            localStorage.setItem('daidi_cart', JSON.stringify(carrinho)); 
+            atualizarContadorCarrinho();
+
+            if (estoqueAtualizado) {
+                let db = JSON.parse(localStorage.getItem('daidi_produtos')) || {};
+                db[produtoAtual.id] = produtoAtual; 
+                localStorage.setItem('daidi_produtos', JSON.stringify(db));
+                
+                renderizarTamanhos();
+                if (comboManualAtivo) renderizarDropdownsCombo();
+            }
+        }
+
+        function carregarPaginaProduto() {
+            const params = new URLSearchParams(window.location.search);
+            const idParam = params.get('prod') || params.get('id') || params.get('ref');
+            produtoAtual = buscarProdutoPorId(idParam);
+            const container = document.getElementById('main-content');
+
+            if (!produtoAtual || !produtoAtual.variantes || produtoAtual.variantes.length === 0) {
+                container.innerHTML = `<div style="text-align: center; padding: 60px 20px;"><h2 style="color: #e63946;">Produto não encontrado!</h2></div>`; return;
+            }
+
+            document.getElementById('bc-title').innerText = produtoAtual.nome || 'Produto';
+            corSelecionada = produtoAtual.variantes[0];
+            precoNormalUnitario = parseFloat(produtoAtual.precoNormal || produtoAtual.preco || 0);
+            precoUnitarioBase = produtoAtual.precoPromo ? parseFloat(produtoAtual.precoPromo) : precoNormalUnitario;
+
+            let coresBtnsHTML = produtoAtual.variantes.map((v, idx) => `<button class="color-btn ${idx === 0 ? 'active' : ''}" onclick="selecionarCor(${idx})">${v.cor}</button>`).join('');
+
+            let comboCardHTML = '';
+            if (produtoAtual.promoQtd && produtoAtual.promoPrecoTotal) {
+                comboCardHTML = `
+                    <div class="promo-card" id="promo-card-box" onclick="alternarCombo()">
+                        <div>
+                            <div style="font-weight:800; color:#bc6c25; font-size: 14px;">🔥 Combo Especial: Leve ${produtoAtual.promoQtd} por R$ ${parseFloat(produtoAtual.promoPrecoTotal).toFixed(2).replace('.', ',')}</div>
+                            <div style="font-size:12px; margin-top:2px; color: inherit;">Monte seu combo escolhendo as cores e tamanhos!</div>
+                        </div>
+                        <button class="promo-card-btn" id="promo-card-btn-txt">MONTAR COMBO</button>
+                    </div>
+                    <div class="combo-customizer" id="combo-customizer-box">
+                        <div class="combo-customizer-title">Customize as ${produtoAtual.promoQtd} peças do pacote:</div>
+                        <div id="combo-items-list" style="display:flex; flex-direction:column; gap:12px;"></div>
+                    </div>`;
+            }
+
+            container.innerHTML = `
+                <div class="product-detail-grid">
+                    <div class="main-image-box"><img id="main-img" src="${corSelecionada.imagem || FOTO_PADRAO}"></div>
+                    <div class="info-column">
+                        <div><h1 class="product-title">${produtoAtual.nome}</h1><div class="product-ref">ref: ${produtoAtual.ref || produtoAtual.id}</div></div>
+                        <div class="price-section">
+                            <div class="price-old" id="display-preco-old">R$ ${precoNormalUnitario.toFixed(2).replace('.', ',')}</div>
+                            <div class="price-pix"><span id="display-preco-pix">R$ ${precoUnitarioBase.toFixed(2).replace('.', ',')}</span> <span>no PIX</span></div>
+                            <div class="price-installments">ou em até 4x de <strong id="display-parcela">R$ ${(precoUnitarioBase / 4).toFixed(2).replace('.', ',')}</strong> s/ juros</div>
+                            <div class="unit-indicator" id="display-indicador-qtd"></div>
+                        </div>
+                        <div><div class="selector-title">Cor / Estampa:</div><div class="color-options">${coresBtnsHTML}</div></div>
+                        <div><div class="selector-title">Tamanho:</div><div class="size-options" id="size-options-box"></div></div>
+                        <div class="coupon-box">
+                            <label style="font-size: 13px; font-weight: bold;">Possui um cupom de desconto?</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="input-cupom" style="flex: 1; padding: 10px; border-radius: 4px; text-transform: uppercase;">
+                                <button onclick="aplicarCupomProduto()" style="background: #bc6c25; color: #fff; border: none; padding: 0 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">APLICAR</button>
+                            </div>
+                            <div id="msg-cupom" style="font-size: 13px; font-weight: 600;"></div>
+                        </div>
+                        <div class="action-row">
+                            <div class="qty-selector">
+                                <button class="qty-btn" onclick="alterarQtd(-1)">-</button>
+                                <input type="text" id="qty-input" class="qty-input" value="1" readonly>
+                                <button class="qty-btn" onclick="alterarQtd(1)">+</button>
+                            </div>
+                            <button class="buy-btn" id="btn-comprar" onclick="adicionarAoCarrinho()">COMPRAR AGORA</button>
+                        </div>
+                        <a class="wishlist-link" onclick="alert('Adicionado aos favoritos!')">♡ Adicionar aos favoritos</a>
+                        ${comboCardHTML}
+                    </div>
+                </div>`;
+            renderizarTamanhos(); recalcularPrecoTela();
+        }
+
+        function atualizarContadorCarrinho() {
+            let carrinho = JSON.parse(localStorage.getItem('daidi_cart')) || [];
+            document.getElementById('cart-count').innerText = carrinho.reduce((acc, item) => acc + (parseInt(item.quantidade) || 1), 0);
+        }
+
+        atualizarContadorCarrinho(); carregarPaginaProduto();
+    </script>
+</body>
+</html>

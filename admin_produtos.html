@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dai&Di - Admin Produtos</title>
+    <style>
+        :root {
+            --bg-body: #f4f4f6;
+            --bg-card: #ffffff;
+            --bg-header: #111111;
+            --bg-input: #ffffff;
+            --bg-box: #fafafa;
+            --bg-variant: #fdfdfd;
+            --bg-variant-item: #ffffff;
+            --text-primary: #333333;
+            --text-title: #111111;
+            --text-label: #444444;
+            --text-muted: #777777;
+            --border-color: #dddddd;
+            --border-card: transparent;
+            --accent: #bc6c25;
+            --accent-hover: #9b541a;
+            --th-bg: #fafafa;
+            --th-color: #555555;
+            --table-border: #eeeeee;
+            --card-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            --btn-theme-bg: #333333;
+            --btn-theme-color: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #121214;
+            --bg-card: #1e1e24;
+            --bg-header: #18181b;
+            --bg-input: #121214;
+            --bg-box: #18181b;
+            --bg-variant: #18181b;
+            --bg-variant-item: #23232a;
+            --text-primary: #e1e1e6;
+            --text-title: #f4f4f6;
+            --text-label: #a1a1aa;
+            --text-muted: #a1a1aa;
+            --border-color: #3f3f46;
+            --border-card: #2d2d35;
+            --accent: #dda15e;
+            --accent-hover: #bc6c25;
+            --th-bg: #18181b;
+            --th-color: #a1a1aa;
+            --table-border: #2d2d35;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --btn-theme-bg: #27272a;
+            --btn-theme-color: #f4f4f6;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-primary); transition: background-color 0.2s, color 0.2s; }
+
+        header {
+            background: var(--bg-header);
+            color: #fff;
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-card);
+        }
+        .logo { font-size: 22px; font-weight: 800; color: #fff; }
+        .logo span { color: var(--accent); }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-theme-toggle {
+            background: var(--btn-theme-bg);
+            color: var(--btn-theme-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+        .btn-theme-toggle:hover { opacity: 0.9; }
+
+        .btn-store { background: var(--btn-theme-bg); color: #fff; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-size: 13px; border: 1px solid var(--border-color); }
+
+        .admin-layout {
+            max-width: 1200px;
+            margin: 30px auto 60px;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 24px;
+            border: 1px solid var(--border-card);
+            box-shadow: var(--card-shadow);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-title);
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group.full { grid-column: span 2; }
+
+        label { font-size: 12px; font-weight: 700; color: var(--text-label); }
+        input, select {
+            background-color: var(--bg-input);
+            color: var(--text-primary);
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 13px;
+            outline: none;
+        }
+        input:focus { border-color: var(--accent); }
+
+        .combo-box {
+            grid-column: span 2;
+            border: 1px dashed var(--border-color);
+            padding: 15px;
+            border-radius: 6px;
+            background: var(--bg-box);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Seção de Variantes */
+        .variants-section {
+            grid-column: span 2;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            background: var(--bg-variant);
+        }
+        .variant-item {
+            border: 1px solid var(--border-color);
+            background: var(--bg-variant-item);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .variant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .btn-remove-variant {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-add-variant {
+            background: #28a745;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .sizes-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-save {
+            grid-column: span 2;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 4px;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+        .btn-save:hover { background: var(--accent-hover); }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--table-border); color: var(--text-primary); }
+        th { background: var(--th-bg); font-weight: 700; color: var(--th-color); }
+        td small { color: var(--text-muted) !important; }
+        .btn-edit { background: #17a2b8; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin-right: 4px; }
+        .btn-delete { background: #dc3545; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">Dai&Di <span>Admin</span></div>
+        <div class="header-actions">
+            <button type="button" class="btn-theme-toggle" id="btn-toggle-theme" onclick="alternarTema()">🌙 Modo Escuro</button>
+            <a href="index.html" class="btn-store">Voltar para a Loja</a>
+        </div>
+    </header>
+
+    <div class="admin-layout">
+        <div class="card">
+            <h2 class="card-title" id="form-title">Cadastrar Novo Produto com Variantes</h2>
+            <form id="form-produto" class="form-grid">
+                <input type="hidden" id="prod-id-edit">
+
+                <div class="form-group">
+                    <label>Nome do Produto</label>
+                    <input type="text" id="prod-nome" required placeholder="Ex: Vestido Satin Elegance">
+                </div>
+                <div class="form-group">
+                    <label>Código / Referência</label>
+                    <input type="text" id="prod-ref" required placeholder="Ex: REF-VEST-01">
+                </div>
+
+                <div class="form-group">
+                    <label>Preço Normal (R$)</label>
+                    <input type="number" step="0.01" id="prod-preco" required placeholder="Ex: 129.90">
+                </div>
+                <div class="form-group">
+                    <label>Preço Promocional (R$) - Opcional</label>
+                    <input type="number" step="0.01" id="prod-promo" placeholder="Ex: 99.90">
+                </div>
+
+                <div class="combo-box">
+                    <div class="form-group" style="margin:0;">
+                        <label>Combo: Comprando a quantidade (Qtd)</label>
+                        <input type="number" id="combo-qtd" placeholder="Ex: 3">
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label>Combo: Valor Total do Pacote (R$)</label>
+                        <input type="number" step="0.01" id="combo-preco" placeholder="Ex: 240.00">
+                    </div>
+                </div>
+
+                <!-- Variantes de Cores/Estampas -->
+                <div class="variants-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="font-size: 14px; font-weight: 700;">Variações (Cores / Estampas e Estoque)</h3>
+                        <button type="button" class="btn-add-variant" onclick="adicionarBlocoVariante()">+ Adicionar Nova Cor/Variante</button>
+                    </div>
+
+                    <div id="variants-container"></div>
+                </div>
+
+                <button type="submit" class="btn-save" id="btn-submit-prod">Salvar Produto</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">📦 Produtos no Catálogo</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ref. / Nome</th>
+                        <th>Preço Normal</th>
+                        <th>Variantes</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-produtos"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // --- Gerenciamento do Tema (Claro / Escuro) ---
+        function alternarTema() {
+            const body = document.body;
+            const btn = document.getElementById('btn-toggle-theme');
+            const ehEscuro = body.getAttribute('data-theme') === 'dark';
+
+            if (ehEscuro) {
+                body.removeAttribute('data-theme');
+                btn.innerHTML = '🌙 Modo Escuro';
+                localStorage.setItem('daidi_theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                btn.innerHTML = '☀️ Modo Claro';
+                localStorage.setItem('daidi_theme', 'dark');
+            }
+        }
+
+        function carregarTemaSalvo() {
+            const temaSalvo = localStorage.getItem('daidi_theme');
+            const btn = document.getElementById('btn-toggle-theme');
+            if (temaSalvo === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                if (btn) btn.innerHTML = '☀️ Modo Claro';
+            } else {
+                document.body.removeAttribute('data-theme');
+                if (btn) btn.innerHTML = '🌙 Modo Escuro';
+            }
+        }
+
+        // --- Variáveis e Funções do Produto ---
+        let varianteContador = 0;
+        const FOTO_PADRAO = 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop';
+
+        function adicionarBlocoVariante(dados = null) {
+            varianteContador++;
+            const id = varianteContador;
+            const container = document.getElementById('variants-container');
+
+            const corNome = dados ? dados.cor : '';
+            const imgUrl = dados ? dados.imagem : '';
+            const estP = dados && dados.estoque ? (dados.estoque.P ?? 5) : 5;
+            const estM = dados && dados.estoque ? (dados.estoque.M ?? 5) : 5;
+            const estG = dados && dados.estoque ? (dados.estoque.G ?? 5) : 5;
+            const estGG = dados && dados.estoque ? (dados.estoque.GG ?? 5) : 5;
+
+            const html = `
+                <div class="variant-item" id="variant-box-${id}">
+                    <div class="variant-header">
+                        <strong>Variante #${id}</strong>
+                        <button type="button" class="btn-remove-variant" onclick="removerBlocoVariante(${id})">Excluir Cor</button>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nome da Cor / Estampa</label>
+                            <input type="text" class="var-cor" value="${corNome}" placeholder="Ex: Preto, Vermelho, Floral..." required>
+                        </div>
+                        <div class="form-group">
+                            <label>URL da Imagem desta Cor</label>
+                            <input type="url" class="var-img" value="${imgUrl}" placeholder="https://..." required>
+                        </div>
+                    </div>
+                    <label style="margin-top:10px; display:block;">Estoque por Tamanho nesta cor:</label>
+                    <div class="sizes-row">
+                        <div class="form-group"><label>P</label><input type="number" class="var-stk-p" value="${estP}"></div>
+                        <div class="form-group"><label>M</label><input type="number" class="var-stk-m" value="${estM}"></div>
+                        <div class="form-group"><label>G</label><input type="number" class="var-stk-g" value="${estG}"></div>
+                        <div class="form-group"><label>GG</label><input type="number" class="var-stk-gg" value="${estGG}"></div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function removerBlocoVariante(id) {
+            const el = document.getElementById(`variant-box-${id}`);
+            if (el) el.remove();
+        }
+
+        function obterProdutosDB() {
+            return JSON.parse(localStorage.getItem('daidi_produtos')) || {};
+        }
+
+        function salvarProdutosDB(db) {
+            localStorage.setItem('daidi_produtos', JSON.stringify(db));
+            renderizarTabelaProdutos();
+        }
+
+        function renderizarTabelaProdutos() {
+            let db = obterProdutosDB();
+            let tbody = document.getElementById('tabela-produtos');
+            tbody.innerHTML = '';
+
+            let chaves = Object.keys(db);
+            if (chaves.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#888;">Nenhum produto cadastrado.</td></tr>';
+                return;
+            }
+
+            chaves.forEach(key => {
+                let p = db[key];
+                let numVariantes = p.variantes ? p.variantes.length : 0;
+                let precoNormal = parseFloat(p.precoNormal || p.preco || 0).toFixed(2).replace('.', ',');
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <strong>${p.nome || 'Sem Nome'}</strong><br>
+                            <small>Ref: ${p.ref || p.id}</small>
+                        </td>
+                        <td>R$ ${precoNormal}</td>
+                        <td>${numVariantes} cor(es)</td>
+                        <td>
+                            <button class="btn-edit" onclick="editarProduto('${p.id || p.ref}')">Editar</button>
+                            <button class="btn-delete" onclick="excluirProduto('${p.id || p.ref}')">Excluir</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('form-produto').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const varianteElements = document.querySelectorAll('.variant-item');
+            if (varianteElements.length === 0) {
+                alert('Adicione pelo menos uma variação de cor/estampa para o produto!');
+                return;
+            }
+
+            let variantes = [];
+            varianteElements.forEach(box => {
+                variantes.push({
+                    cor: box.querySelector('.var-cor').value.trim(),
+                    imagem: box.querySelector('.var-img').value.trim(),
+                    estoque: {
+                        P: parseInt(box.querySelector('.var-stk-p').value) || 0,
+                        M: parseInt(box.querySelector('.var-stk-m').value) || 0,
+                        G: parseInt(box.querySelector('.var-stk-g').value) || 0,
+                        GG: parseInt(box.querySelector('.var-stk-gg').value) || 0
+                    }
+                });
+            });
+
+            let db = obterProdutosDB();
+            let idEdit = document.getElementById('prod-id-edit').value;
+            let ref = document.getElementById('prod-ref').value.trim();
+            let prodId = idEdit || ref || 'PROD_' + Date.now();
+
+            let novoProduto = {
+                id: prodId,
+                ref: ref,
+                nome: document.getElementById('prod-nome').value.trim(),
+                precoNormal: parseFloat(document.getElementById('prod-preco').value),
+                precoPromo: document.getElementById('prod-promo').value ? parseFloat(document.getElementById('prod-promo').value) : null,
+                promoQtd: document.getElementById('combo-qtd').value ? parseInt(document.getElementById('combo-qtd').value) : null,
+                promoPrecoTotal: document.getElementById('combo-preco').value ? parseFloat(document.getElementById('combo-preco').value) : null,
+                imagemPrincipal: variantes[0].imagem,
+                variantes: variantes
+            };
+
+            db[prodId] = novoProduto;
+            salvarProdutosDB(db);
+
+            alert('Produto e variações salvas com sucesso!');
+            resetarFormulario();
+        });
+
+        function editarProduto(id) {
+            let db = obterProdutosDB();
+            let p = db[id];
+            if (!p) return;
+
+            document.getElementById('prod-id-edit').value = p.id || p.ref;
+            document.getElementById('form-title').innerText = 'Editar Produto (' + (p.ref || p.id) + ')';
+            document.getElementById('btn-submit-prod').innerText = 'Atualizar Produto';
+
+            document.getElementById('prod-nome').value = p.nome || '';
+            document.getElementById('prod-ref').value = p.ref || p.id || '';
+            document.getElementById('prod-preco').value = p.precoNormal || '';
+            document.getElementById('prod-promo').value = p.precoPromo || '';
+            document.getElementById('combo-qtd').value = p.promoQtd || '';
+            document.getElementById('combo-preco').value = p.promoPrecoTotal || '';
+
+            document.getElementById('variants-container').innerHTML = '';
+            varianteContador = 0;
+
+            if (p.variantes && p.variantes.length > 0) {
+                p.variantes.forEach(v => adicionarBlocoVariante(v));
+            } else {
+                adicionarBlocoVariante();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function excluirProduto(id) {
+            if (confirm('Tem certeza de que deseja excluir este produto?')) {
+                let db = obterProdutosDB();
+                delete db[id];
+                salvarProdutosDB(db);
+            }
+        }
+
+        function resetarFormulario() {
+            document.getElementById('form-produto').reset();
+            document.getElementById('prod-id-edit').value = '';
+            document.getElementById('variants-container').innerHTML = '';
+            varianteContador = 0;
+            adicionarBlocoVariante();
+            document.getElementById('form-title').innerText = 'Cadastrar Novo Produto com Variantes';
+            document.getElementById('btn-submit-prod').innerText = 'Salvar Produto';
+        }
+
+        // Inicialização
+        carregarTemaSalvo();
+        adicionarBlocoVariante();
+        renderizarTabelaProdutos();
+    </script>
+</body>
+</html>

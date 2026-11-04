@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar / Criar Conta - Dibincá</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #333333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.dark-theme {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            background: #ffffff;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        body.dark-theme header {
+            background: #1e1e1e;
+            border-bottom-color: #333333;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #111111;
+            text-decoration: none;
+        }
+
+        body.dark-theme .logo {
+            color: #ffffff;
+        }
+
+        .logo span {
+            color: #bc6c25;
+        }
+
+        .theme-toggle-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Container Autenticação */
+        .auth-container {
+            max-width: 420px;
+            width: 100%;
+            margin: 50px auto;
+            background: #ffffff;
+            padding: 35px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #eaeaea;
+        }
+
+        body.dark-theme .auth-container {
+            background: #1e1e1e;
+            border-color: #333333;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        .auth-container h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #222222;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        body.dark-theme .auth-container h2 {
+            color: #ffffff;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #444444;
+        }
+
+        body.dark-theme .form-group label {
+            color: #cccccc;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cccccc;
+            border-radius: 6px;
+            font-size: 14px;
+            background: #ffffff;
+            color: #333333;
+            outline: none;
+        }
+
+        body.dark-theme .form-group input {
+            background: #2a2a2a;
+            border-color: #444444;
+            color: #ffffff;
+        }
+
+        .form-group input:focus {
+            border-color: #bc6c25;
+        }
+
+        .btn-principal {
+            width: 100%;
+            padding: 13px;
+            background: #bc6c25;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-principal:hover {
+            background: #a35d1f;
+        }
+
+        .btn-google {
+            width: 100%;
+            padding: 12px;
+            background: #ffffff;
+            color: #444444;
+            border: 1px solid #cccccc;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        body.dark-theme .btn-google {
+            background: #2a2a2a;
+            color: #ffffff;
+            border-color: #444444;
+        }
+
+        .btn-google:hover {
+            background: #f1f1f1;
+        }
+
+        body.dark-theme .btn-google:hover {
+            background: #333333;
+        }
+
+        .btn-google img {
+            width: 18px;
+            height: 18px;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            color: #888888;
+            font-size: 13px;
+            position: relative;
+            font-weight: 600;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: #dddddd;
+        }
+
+        body.dark-theme .divider::before, body.dark-theme .divider::after {
+            background: #444444;
+        }
+
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+
+        .toggle-link {
+            text-align: center;
+            margin-top: 22px;
+            font-size: 14px;
+            color: #555555;
+        }
+
+        body.dark-theme .toggle-link {
+            color: #aaa;
+        }
+
+        .toggle-link a {
+            color: #bc6c25;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .toggle-link a:hover {
+            text-decoration: underline;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">Dibincá <span>Infantil</span></a>
+        <button id="theme-toggle" class="theme-toggle-btn" onclick="alternarTema()" title="Alternar Tema">🌙</button>
+    </header>
+
+    <div class="auth-container">
+        
+        <!-- ================= CAIXA DE LOGIN ================= -->
+        <div id="login-box">
+            <h2>Acesse sua conta</h2>
+            
+            <button type="button" class="btn-google" onclick="loginComGoogleLocal()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+                Entrar com o Google
+            </button>
+
+            <div class="divider">OU</div>
+
+            <form id="form-login">
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" id="login-email" placeholder="seu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="login-senha" placeholder="Sua senha" required>
+                </div>
+                <button type="submit" class="btn-principal">Entrar</button>
+            </form>
+
+            <div class="toggle-link">
+                Ainda não tem conta? <a onclick="toggleView('register')">Criar conta</a>
+            </div>
+        </div>
+
+        <!-- ================= CAIXA DE REGISTRO ================= -->
+        <div id="register-box" class="hidden">
+            <h2>Criar nova conta</h2>
+            
+            <button type="button" class="btn-google" onclick="loginComGoogleLocal()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+                Criar conta com o Google
+            </button>
+
+            <div class="divider">OU</div>
+
+            <form id="form-register">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" id="reg-nome" placeholder="Ex: Maria Silva" required>
+                </div>
+                <div class="form-group">
+                    <label>Telefone / WhatsApp</label>
+                    <input type="tel" id="reg-telefone" placeholder="(00) 00000-0000" required>
+                </div>
+                <div class="form-group">
+                    <label>E-mail</label>
+                    <input type="email" id="reg-email" placeholder="seu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Senha (mínimo 6 caracteres)</label>
+                    <input type="password" id="reg-senha" minlength="6" placeholder="Mínimo 6 caracteres" required>
+                </div>
+                <button type="submit" class="btn-principal">Cadastrar</button>
+            </form>
+
+            <div class="toggle-link">
+                Já tem uma conta? <a onclick="toggleView('login')">Entrar</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Tema Escuro / Claro
+        function carregarTema() {
+            const temaSalvo = localStorage.getItem('dibinca_theme');
+            const btnTema = document.getElementById('theme-toggle');
+            if (temaSalvo === 'dark') {
+                document.body.classList.add('dark-theme');
+                if (btnTema) btnTema.innerText = '☀️';
+            }
+        }
+
+        function alternarTema() {
+            document.body.classList.toggle('dark-theme');
+            const ehEscuro = document.body.classList.contains('dark-theme');
+            localStorage.setItem('dibinca_theme', ehEscuro ? 'dark' : 'light');
+            const btnTema = document.getElementById('theme-toggle');
+            if (btnTema) btnTema.innerText = ehEscuro ? '☀️' : '🌙';
+        }
+
+        // Alterna a exibição entre as telas de Login e Registro
+        function toggleView(view) {
+            document.getElementById('login-box').classList.add('hidden');
+            document.getElementById('register-box').classList.add('hidden');
+            
+            if(view === 'login') {
+                document.getElementById('login-box').classList.remove('hidden');
+            } else {
+                document.getElementById('register-box').classList.remove('hidden');
+            }
+        }
+
+        // Funções para gerenciar o banco de dados local dos usuários (dibinca_users)
+        function getUsersDB() {
+            return JSON.parse(localStorage.getItem('dibinca_users')) || [];
+        }
+
+        function saveUsersDB(users) {
+            localStorage.setItem('dibinca_users', JSON.stringify(users));
+        }
+
+        // Simulação do Login via Google para testes locais
+        function loginComGoogleLocal() {
+            const googleUser = {
+                nome: "Cliente Google",
+                email: "cliente.google@gmail.com",
+                telefone: "(47) 99999-9999"
+            };
+
+            // Salva o usuário logado no dibinca_logged_user
+            localStorage.setItem('dibinca_logged_user', JSON.stringify(googleUser));
+            alert("Login realizado com sucesso via Google!");
+            window.location.href = "index.html";
+        }
+
+        // Cadastro manual de novos usuários
+        document.getElementById('form-register').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const nome = document.getElementById('reg-nome').value.trim();
+            const telefone = document.getElementById('reg-telefone').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const senha = document.getElementById('reg-senha').value;
+
+            const users = getUsersDB();
+
+            const jaExiste = users.find(u => u.email === email);
+            if (jaExiste) {
+                alert("Este e-mail já está cadastrado!");
+                return;
+            }
+
+            const novoUsuario = { nome, telefone, email, senha };
+            users.push(novoUsuario);
+            saveUsersDB(users);
+
+            // Loga o usuário imediatamente após o cadastro
+            localStorage.setItem('dibinca_logged_user', JSON.stringify(novoUsuario));
+
+            alert("Conta criada com sucesso!");
+            window.location.href = "index.html";
+        });
+
+        // Login manual com e-mail e senha cadastrados
+        document.getElementById('form-login').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('login-email').value.trim();
+            const senha = document.getElementById('login-senha').value;
+
+            const users = getUsersDB();
+            const usuarioValido = users.find(u => u.email === email && u.senha === senha);
+
+            if (usuarioValido) {
+                localStorage.setItem('dibinca_logged_user', JSON.stringify(usuarioValido));
+                alert("Login realizado com sucesso!");
+                window.location.href = "index.html";
+            } else {
+                alert("E-mail ou senha incorretos.");
+            }
+        });
+
+        // Inicializa o tema ao carregar
+        carregarTema();
+    </script>
+</body>
+</html>
