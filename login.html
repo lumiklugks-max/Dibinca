@@ -255,7 +255,7 @@
         <div id="login-box">
             <h2>Acesse sua conta</h2>
             
-            <button type="button" class="btn-google" onclick="loginComGoogleLocal()">
+            <button type="button" class="btn-google" id="btn-google-login">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
                 Entrar com o Google
             </button>
@@ -283,7 +283,7 @@
         <div id="register-box" class="hidden">
             <h2>Criar nova conta</h2>
             
-            <button type="button" class="btn-google" onclick="loginComGoogleLocal()">
+            <button type="button" class="btn-google" id="btn-google-register">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
                 Criar conta com o Google
             </button>
@@ -357,20 +357,6 @@
             localStorage.setItem('dibinca_users', JSON.stringify(users));
         }
 
-        // Simulação do Login via Google para testes locais
-        function loginComGoogleLocal() {
-            const googleUser = {
-                nome: "Cliente Google",
-                email: "cliente.google@gmail.com",
-                telefone: "(47) 99999-9999"
-            };
-
-            // Salva o usuário logado no dibinca_logged_user
-            localStorage.setItem('dibinca_logged_user', JSON.stringify(googleUser));
-            alert("Login realizado com sucesso via Google!");
-            window.location.href = "index.html";
-        }
-
         // Cadastro manual de novos usuários
         document.getElementById('form-register').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -420,6 +406,36 @@
 
         // Inicializa o tema ao carregar
         carregarTema();
+    </script>
+
+    <!-- Integração oficial Firebase Auth para o Google Pop-up -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { firebaseConfig } from "./firebase-config.js";
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        async function fazerLoginGoogle() {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                const dadosUsuario = {
+                    nome: user.displayName || user.email.split('@')[0],
+                    email: user.email
+                };
+                localStorage.setItem('dibinca_logged_user', JSON.stringify(dadosUsuario));
+                window.location.href = "index.html";
+            } catch (error) {
+                console.error("Erro no login com Google:", error);
+                alert("Falha ao autenticar com o Google: " + error.message);
+            }
+        }
+
+        document.getElementById('btn-google-login').addEventListener('click', fazerLoginGoogle);
+        document.getElementById('btn-google-register').addEventListener('click', fazerLoginGoogle);
     </script>
 </body>
 </html>
